@@ -34,7 +34,20 @@ const Login = () => {
 
     return (
         <div className="auth-container">
+            {/* Animated Background */}
+            <div className="auth-bg-effects">
+                <div className="bg-orb bg-orb-1"></div>
+                <div className="bg-orb bg-orb-2"></div>
+                <div className="bg-orb bg-orb-3"></div>
+                <div className="bg-grid"></div>
+            </div>
+
             <div className="auth-card">
+                <div className="auth-brand">
+                    <span className="brand-icon">✨</span>
+                    <span className="brand-name">AI Stylist</span>
+                </div>
+
                 <div className="auth-header">
                     <h1>Welcome Back</h1>
                     <p>Login to continue your style journey</p>
@@ -50,29 +63,35 @@ const Login = () => {
 
                     <div className="form-group">
                         <label htmlFor="email">Email Address</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
-                            required
-                            autoComplete="email"
-                        />
+                        <div className="input-wrapper">
+                            <span className="input-icon">📧</span>
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                required
+                                autoComplete="email"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            autoComplete="current-password"
-                            minLength="6"
-                        />
+                        <div className="input-wrapper">
+                            <span className="input-icon">🔒</span>
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                autoComplete="current-password"
+                                minLength="6"
+                            />
+                        </div>
                     </div>
 
                     <button type="submit" className="auth-button" disabled={loading}>
@@ -82,7 +101,10 @@ const Login = () => {
                                 Logging in...
                             </>
                         ) : (
-                            'Login'
+                            <>
+                                <span>Sign In</span>
+                                <span className="btn-arrow">→</span>
+                            </>
                         )}
                     </button>
 
@@ -90,7 +112,7 @@ const Login = () => {
                         <p>
                             Don't have an account?{' '}
                             <Link to="/signup" className="auth-link">
-                                Sign up
+                                Create Account
                             </Link>
                         </p>
                     </div>

@@ -8,8 +8,10 @@ const ChatPage = () => {
     const [inputMessage, setInputMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [typing, setTyping] = useState(false);
+    const [connectionError, setConnectionError] = useState(false);
     const messagesEndRef = useRef(null);
     const navigate = useNavigate();
+    const REQUEST_TIMEOUT = 30000; // 30 second timeout
 
     // Scroll to bottom when new messages arrive
     const scrollToBottom = () => {
@@ -54,23 +56,37 @@ const ChatPage = () => {
     const loadGreeting = async () => {
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/login');
+                return;
+            }
             const response = await axios.get('http://localhost:5000/api/chat/greeting', {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: REQUEST_TIMEOUT
             });
 
             if (response.data.success) {
                 setMessages([{
                     role: 'assistant',
                     message: response.data.greeting,
-                    timestamp: new Date()
+                    timestamp: new Date().toISOString()
                 }]);
             }
+            setConnectionError(false);
         } catch (error) {
             console.error('Greeting error:', error);
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                navigate('/login');
+                return;
+            }
+            setConnectionError(error.code === 'ERR_NETWORK');
             setMessages([{
                 role: 'assistant',
-                message: "👋 Hi! I'm your AI Style Assistant! How can I help you today?",
-                timestamp: new Date()
+                message: error.code === 'ERR_NETWORK' 
+                    ? "⚠️ Cannot connect to the server. Please check if the backend is running."
+                    : "👋 Hi! I'm your AI Style Assistant! How can I help you today?",
+                timestamp: new Date().toISOString()
             }]);
         }
     };
@@ -84,7 +100,7 @@ const ChatPage = () => {
         const userMessage = {
             role: 'user',
             message: messageToSend,
-            timestamp: new Date()
+            timestamp: new Date().toISOString()
         };
 
         const updatedMessages = [...messages, userMessage];
@@ -96,6 +112,10 @@ const ChatPage = () => {
 
         try {
             const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/login');
+                return;
+            }
 
             // Send message with conversation history
             const response = await axios.post(
@@ -105,11 +125,13 @@ const ChatPage = () => {
                     conversationHistory: messages
                 },
                 {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: `Bearer ${token}` },
+                    timeout: REQUEST_TIMEOUT
                 }
             );
 
             setTyping(false);
+            setConnectionError(false);
 
             if (response.data.success) {
                 // Add bot response
@@ -118,7 +140,7 @@ const ChatPage = () => {
                     message: response.data.message,
                     products: response.data.products || [],
                     suggestions: response.data.suggestions || [],
-                    timestamp: new Date()
+                    timestamp: new Date().toISOString()
                 };
 
                 const newMessages = [...updatedMessages, botMessage];
@@ -129,10 +151,27 @@ const ChatPage = () => {
             setTyping(false);
             console.error('Chat error:', error);
 
+            // Token expired
+            if (error.response?.status === 401) {
+                localStorage.removeItem('token');
+                navigate('/login');
+                return;
+            }
+
+            let errorMsg = "Sorry, I couldn't process that. Please try again!";
+            if (error.code === 'ERR_NETWORK') {
+                errorMsg = "⚠️ Cannot reach the server. Please check your connection.";
+                setConnectionError(true);
+            } else if (error.code === 'ECONNABORTED') {
+                errorMsg = "⏱️ Request timed out. The server might be busy — try again.";
+            } else if (error.response?.status >= 500) {
+                errorMsg = "🔧 Server error. Please try again in a moment.";
+            }
+
             const errorMessage = {
                 role: 'assistant',
-                message: "Sorry, I couldn't process that. Please try again!",
-                timestamp: new Date()
+                message: errorMsg,
+                timestamp: new Date().toISOString()
             };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
@@ -218,10 +257,14 @@ const ChatPage = () => {
                             )}
 
                             <span className="message-time">
-                                {msg.timestamp.toLocaleTimeString('en-US', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
+                                {(() => {
+                                    try {
+                                        const d = typeof msg.timestamp === 'string' ? new Date(msg.timestamp) : msg.timestamp;
+                                        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                                    } catch {
+                                        return '';
+                                    }
+                                })()}
                             </span>
                         </div>
                     </div>

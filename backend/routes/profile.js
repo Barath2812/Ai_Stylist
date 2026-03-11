@@ -27,7 +27,7 @@ const authenticate = (req, res, next) => {
 // @access  Private
 router.post('/save', authenticate, async (req, res) => {
     try {
-        const { profile, photoUrl } = req.body;
+        const { profile, photoUrl, products } = req.body;
 
         if (!profile) {
             return res.status(400).json({
@@ -46,8 +46,20 @@ router.post('/save', authenticate, async (req, res) => {
         user.styleProfile = {
             ...profile,
             photoUrl: photoUrl || user.styleProfile?.photoUrl,
+            curatedProducts: products || user.styleProfile?.curatedProducts || null,
             analyzedAt: new Date()
         };
+
+        // Add to history
+        user.analyses.push({
+            date: new Date(),
+            imagePath: photoUrl || user.styleProfile?.photoUrl,
+            faceShape: profile.physical?.faceShape?.type || profile.physical?.faceShape,
+            skinTone: profile.physical?.skinTone?.category || profile.physical?.skinTone,
+            colors: profile.colorPalette?.best?.map(c => c.name) || [],
+            occasion: profile.occasion || 'General',
+            products: products || null
+        });
 
         await user.save();
 

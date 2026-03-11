@@ -9,9 +9,12 @@ import DashboardHome from './components/Dashboard/DashboardHome'
 import OutfitsPage from './components/Pages/OutfitsPage'
 import SearchResults from './components/Pages/SearchResults'
 import ChatPage from './components/Pages/ChatPage'
+import ColorPalettePage from './components/Pages/ColorPalettePage'
+import HistoryPage from './components/Pages/HistoryPage'
 import ProfilePage from './components/Pages/ProfilePage'
 import UploadForm from './components/UploadForm'
 import Result from './components/Result'
+import TryOnPage from './components/Pages/TryOnPage'
 import './App.css'
 
 // Upload Page Component (wraps your existing functionality)
@@ -42,25 +45,7 @@ function UploadPage() {
     )
 }
 
-// Placeholder components for features (we'll build these next)
 
-function ColorPalettePage() {
-    return (
-        <div className="page-container">
-            <h1>Color Palette</h1>
-            <p>Color Preview Tool coming soon! 🎨</p>
-        </div>
-    );
-}
-
-function HistoryPage() {
-    return (
-        <div className="page-container">
-            <h1>Style History</h1>
-            <p>Evolution Tracker coming soon! 📈</p>
-        </div>
-    );
-}
 
 function App() {
     return (
@@ -86,6 +71,7 @@ function App() {
                 <Route path="colors" element={<ColorPalettePage />} />
                 <Route path="history" element={<HistoryPage />} />
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="tryon" element={<TryOnPage />} />
             </Route>
 
             {/* Redirect root to dashboard */}

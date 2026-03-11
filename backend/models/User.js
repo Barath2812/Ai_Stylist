@@ -32,7 +32,8 @@ const userSchema = new mongoose.Schema({
         faceShape: String,
         skinTone: String,
         colors: [String],
-        occasion: String
+        occasion: String,
+        products: mongoose.Schema.Types.Mixed
     }],
     outfits: [{
         id: String,

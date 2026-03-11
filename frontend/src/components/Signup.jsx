@@ -18,7 +18,6 @@ const Signup = () => {
         e.preventDefault();
         setError('');
 
-        // Validation
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return;
@@ -48,7 +47,20 @@ const Signup = () => {
 
     return (
         <div className="auth-container">
+            {/* Animated Background */}
+            <div className="auth-bg-effects">
+                <div className="bg-orb bg-orb-1"></div>
+                <div className="bg-orb bg-orb-2"></div>
+                <div className="bg-orb bg-orb-3"></div>
+                <div className="bg-grid"></div>
+            </div>
+
             <div className="auth-card">
+                <div className="auth-brand">
+                    <span className="brand-icon">✨</span>
+                    <span className="brand-name">AI Stylist</span>
+                </div>
+
                 <div className="auth-header">
                     <h1>Create Account</h1>
                     <p>Join us to discover your perfect style</p>
@@ -64,57 +76,69 @@ const Signup = () => {
 
                     <div className="form-group">
                         <label htmlFor="name">Full Name</label>
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="John Doe"
-                            required
-                            autoComplete="name"
-                        />
+                        <div className="input-wrapper">
+                            <span className="input-icon">👤</span>
+                            <input
+                                type="text"
+                                id="name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="John Doe"
+                                required
+                                autoComplete="name"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="email">Email Address</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
-                            required
-                            autoComplete="email"
-                        />
+                        <div className="input-wrapper">
+                            <span className="input-icon">📧</span>
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                required
+                                autoComplete="email"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            autoComplete="new-password"
-                            minLength="6"
-                        />
+                        <div className="input-wrapper">
+                            <span className="input-icon">🔒</span>
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                autoComplete="new-password"
+                                minLength="6"
+                            />
+                        </div>
                         <small className="form-hint">At least 6 characters</small>
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="confirmPassword">Confirm Password</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            autoComplete="new-password"
-                            minLength="6"
-                        />
+                        <div className="input-wrapper">
+                            <span className="input-icon">🔐</span>
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                autoComplete="new-password"
+                                minLength="6"
+                            />
+                        </div>
                     </div>
 
                     <button type="submit" className="auth-button" disabled={loading}>
@@ -124,7 +148,10 @@ const Signup = () => {
                                 Creating account...
                             </>
                         ) : (
-                            'Sign Up'
+                            <>
+                                <span>Create Account</span>
+                                <span className="btn-arrow">→</span>
+                            </>
                         )}
                     </button>
 
@@ -132,7 +159,7 @@ const Signup = () => {
                         <p>
                             Already have an account?{' '}
                             <Link to="/login" className="auth-link">
-                                Login
+                                Sign In
                             </Link>
                         </p>
                     </div>

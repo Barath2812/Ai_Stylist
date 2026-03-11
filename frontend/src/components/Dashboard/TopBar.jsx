@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './TopBar.css';
@@ -8,6 +8,19 @@ const TopBar = ({ toggleSidebar }) => {
     const navigate = useNavigate();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isLightTheme, setIsLightTheme] = useState(() => {
+        return document.body.classList.contains('light-theme');
+    });
+
+    const toggleTheme = () => {
+        const nextTheme = !isLightTheme;
+        setIsLightTheme(nextTheme);
+        if (nextTheme) {
+            document.body.classList.add('light-theme');
+        } else {
+            document.body.classList.remove('light-theme');
+        }
+    };
 
     const handleLogout = () => {
         logout();
@@ -44,10 +57,13 @@ const TopBar = ({ toggleSidebar }) => {
 
             {/* Right Section */}
             <div className="topbar-right">
-                {/* Notifications */}
-                <button className="topbar-icon notification-btn">
-                    <span className="icon">🔔</span>
-                    <span className="badge">3</span>
+                {/* Theme Toggle */}
+                <button
+                    className="topbar-icon theme-toggle-btn"
+                    onClick={toggleTheme}
+                    title={isLightTheme ? "Switch to Dark Mode" : "Switch to Light Mode"}
+                >
+                    <span className="icon">{isLightTheme ? '🌙' : '☀️'}</span>
                 </button>
 
                 {/* Settings */}

@@ -6,7 +6,11 @@ const TryOn = ({ product, userImagePath, onBack }) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const [errorType, setErrorType] = useState(null); // 'network' | 'timeout' | 'rate-limit' | 'server'
     const [progress, setProgress] = useState(0);
+    const [retryCount, setRetryCount] = useState(0);
+    const MAX_RETRIES = 3;
+    const TIMEOUT_MS = 120000; // 2 minutes for try-on
 
     useEffect(() => {
         // Auto-start try-on when component loads
@@ -26,10 +30,81 @@ const TryOn = ({ product, userImagePath, onBack }) => {
         }
     }, [loading]);
 
-    const handleTryOn = async () => {
+    const classifyError = (err) => {
+        if (!err) return { type: 'server', message: 'An unknown error occurred' };
+
+        // Network errors (no response at all)
+        if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+            return {
+                type: 'network',
+                message: 'Cannot connect to the server. Please check your internet connection and ensure the backend is running.',
+                tips: ['Check if the backend server is running on port 5000', 'Verify your internet connection', 'Try refreshing the page']
+            };
+        }
+
+        // Timeout errors
+        if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+            return {
+                type: 'timeout',
+                message: 'The try-on process took too long. This can happen when the AI model is warming up.',
+                tips: ['Try again — the model may be ready now', 'Use a smaller or clearer image', 'The first attempt often takes longer']
+            };
+        }
+
+        const status = err.response?.status;
+
+        // Rate limiting
+        if (status === 429) {
+            return {
+                type: 'rate-limit',
+                message: 'Too many requests. The AI service is rate-limited.',
+                tips: ['Wait 30 seconds before trying again', 'The free tier has limited requests per minute']
+            };
+        }
+
+        // Auth errors
+        if (status === 401 || status === 403) {
+            return {
+                type: 'server',
+                message: 'API authentication failed. Check your Replicate API token.',
+                tips: ['Verify REPLICATE_API_TOKEN in your .env file', 'Ensure the token has not expired']
+            };
+        }
+
+        // Server errors
+        if (status >= 500) {
+            return {
+                type: 'server',
+                message: err.response?.data?.error || 'The server encountered an error processing your request.',
+                tips: ['Try again in a few moments', 'Check backend logs for more details']
+            };
+        }
+
+        // Client errors
+        if (status >= 400) {
+            return {
+                type: 'server',
+                message: err.response?.data?.error || 'Invalid request. Please check your inputs.',
+                tips: ['Ensure your uploaded image is valid', 'Check that the product URL is accessible']
+            };
+        }
+
+        return {
+            type: 'server',
+            message: err.response?.data?.error || err.message || 'Virtual try-on failed',
+            tips: ['Try again', 'Check if the backend server is running']
+        };
+    };
+
+    const handleTryOn = async (isRetry = false) => {
         setLoading(true);
         setError(null);
+        setErrorType(null);
         setProgress(10);
+
+        if (!isRetry) {
+            setRetryCount(0);
+        }
 
         try {
             console.log('🎨 Starting virtual try-on...');
@@ -39,11 +114,14 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             const response = await axios.post('http://localhost:5000/api/virtual-tryon', {
                 userImagePath: userImagePath,
                 productImageUrl: product.image
+            }, {
+                timeout: TIMEOUT_MS
             });
 
             if (response.data.success) {
                 console.log('✅ Virtual try-on successful!');
                 setProgress(100);
+                setRetryCount(0);
                 setTimeout(() => {
                     setResult(response.data.resultImageBase64);
                     setLoading(false);
@@ -54,7 +132,21 @@ const TryOn = ({ product, userImagePath, onBack }) => {
 
         } catch (err) {
             console.error('❌ Try-on error:', err);
-            setError(err.response?.data?.error || err.message || 'Virtual try-on failed');
+            const classified = classifyError(err);
+
+            // Auto-retry for server errors and rate limits
+            const currentRetry = isRetry ? retryCount : 0;
+            if ((classified.type === 'server' || classified.type === 'rate-limit') && currentRetry < MAX_RETRIES) {
+                const delay = Math.pow(2, currentRetry) * 1000; // 1s, 2s, 4s
+                console.log(`🔄 Retrying in ${delay / 1000}s (attempt ${currentRetry + 1}/${MAX_RETRIES})...`);
+                setRetryCount(prev => prev + 1);
+                setProgress(5);
+                setTimeout(() => handleTryOn(true), delay);
+                return;
+            }
+
+            setError(classified.message);
+            setErrorType(classified.type);
             setLoading(false);
             setProgress(0);
         }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Result.css';
 
@@ -6,7 +6,34 @@ const Result = ({ result, reset }) => {
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
 
+    // Products State
+    const [products, setProducts] = useState(null);
+    const [productsLoading, setProductsLoading] = useState(true);
+
     const { profile, imageQuality } = result;
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setProductsLoading(true);
+                const response = await axios.post('http://localhost:5000/api/products/recommendations', {
+                    profile: profile
+                });
+
+                if (response.data.success) {
+                    setProducts(response.data.products);
+                }
+            } catch (err) {
+                console.error("Failed to fetch product recommendations:", err);
+            } finally {
+                setProductsLoading(false);
+            }
+        };
+
+        if (profile) {
+            fetchProducts();
+        }
+    }, [profile]);
 
     const handleSaveProfile = async () => {
         try {
@@ -17,7 +44,8 @@ const Result = ({ result, reset }) => {
                 'http://localhost:5000/api/profile/save',
                 {
                     profile: profile,
-                    photoUrl: result.userImagePath
+                    photoUrl: result.userImagePath,
+                    products: products
                 },
                 {
                     headers: { Authorization: `Bearer ${token}` }
@@ -306,6 +334,63 @@ const Result = ({ result, reset }) => {
                         <div className="seasonal-tip">
                             <h4>Seasonal Tip</h4>
                             <p>{profile.recommendations.seasonal}</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* AI Curated Products Section */}
+                <div className="profile-card full-width">
+                    <div className="card-header">
+                        <span className="card-icon">🛍️</span>
+                        <h2>Curated For You</h2>
+                    </div>
+
+                    {productsLoading ? (
+                        <div className="products-loading">
+                            <div className="spinner"></div>
+                            <p>Finding the perfect matches for your style profile...</p>
+                        </div>
+                    ) : products ? (
+                        <div className="curated-products-container">
+                            {Object.entries(products).map(([category, items]) => {
+                                if (!items || items.length === 0) return null;
+
+                                const categoryTitles = {
+                                    shirt: "Tops & Shirts",
+                                    pant: "Trousers & Bottoms",
+                                    shoes: "Footwear",
+                                    watch: "Watches",
+                                    accessories: "Accessories"
+                                };
+
+                                return (
+                                    <div key={category} className="product-category-row">
+                                        <h3>{categoryTitles[category] || category}</h3>
+                                        <div className="scrolling-product-grid">
+                                            {items.map(product => (
+                                                <a href={product.buyLink} target="_blank" rel="noopener noreferrer" key={product.id} className="curated-product-card">
+                                                    <div className="product-image-wrap">
+                                                        <img src={product.image} alt={product.name} loading="lazy" />
+                                                        {product.discount && <span className="product-discount">{product.discount}</span>}
+                                                    </div>
+                                                    <div className="product-details">
+                                                        <span className="product-brand">{product.brand || 'Premium Brand'}</span>
+                                                        <span className="product-name" title={product.name}>{product.name}</span>
+                                                        <div className="product-price-row">
+                                                            <span className="product-price">{product.price}</span>
+                                                            {product.originalPrice && <span className="product-original-price">{product.originalPrice}</span>}
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="products-empty">
+                            <p>Failed to load curated products.</p>
                         </div>
                     )}
                 </div>

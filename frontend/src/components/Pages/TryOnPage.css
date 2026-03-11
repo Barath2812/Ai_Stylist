@@ -1,0 +1,303 @@
+.tryon-page-container {
+    padding: 2.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.tryon-header-section {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.tryon-header-section h1 {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+}
+
+.tryon-header-section p {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.standalone-upload-form {
+    background: var(--bg-card);
+    padding: 3rem;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+.form-group-tryon {
+    margin-bottom: 2.5rem;
+}
+
+.form-group-tryon label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.form-group-tryon p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+/* User Image Upload Area */
+.image-upload-area {
+    border: 1px dashed var(--glass-border);
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    background: rgba(255, 255, 255, 0.02);
+    display: block;
+}
+
+.image-upload-area:hover {
+    border-color: var(--text-secondary);
+    background: var(--bg-card-hover);
+}
+
+.image-upload-area input {
+    display: none;
+}
+
+.image-upload-area h3 {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--text-primary);
+}
+
+.upload-icon {
+    font-size: 2.5rem;
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.image-preview-wrapper {
+    position: relative;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.image-preview-wrapper img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+.remove-image-btn {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    background: var(--bg-dark);
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+    line-height: 1;
+}
+
+.remove-image-btn:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+    transform: scale(1.05);
+}
+
+/* Product URL Input */
+.product-url-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: var(--transition-smooth);
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+}
+
+.product-url-input::placeholder {
+    color: var(--text-muted);
+}
+
+.product-url-input:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.product-url-preview {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.product-url-preview img {
+    max-height: 250px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+}
+
+/* Submit Button */
+.tryon-submit-btn {
+    width: 100%;
+    padding: 1.1rem;
+    background: var(--primary-light);
+    color: var(--bg-dark);
+    border: 1px solid var(--primary-light);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 2rem;
+}
+
+.tryon-submit-btn:hover:not(:disabled) {
+    background: transparent;
+    color: var(--primary-light);
+}
+
+.tryon-submit-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--glass-border);
+    border-color: transparent;
+    color: var(--text-secondary);
+}
+
+.tryon-error-msg {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.small-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .tryon-page-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .tryon-header-section {
+        margin-bottom: 2rem;
+    }
+
+    .tryon-header-section h1 {
+        font-size: 1.8rem;
+    }
+
+    .tryon-header-section p {
+        font-size: 0.95rem;
+    }
+
+    .standalone-upload-form {
+        padding: 2rem 1.5rem;
+    }
+
+    .form-group-tryon {
+        margin-bottom: 1.75rem;
+    }
+
+    .image-upload-area {
+        padding: 2rem 1.25rem;
+    }
+
+    .product-url-preview img {
+        max-height: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tryon-page-container {
+        padding: 1rem 0.75rem;
+    }
+
+    .tryon-header-section h1 {
+        font-size: 1.4rem;
+    }
+
+    .tryon-header-section p {
+        font-size: 0.85rem;
+    }
+
+    .standalone-upload-form {
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+    }
+
+    .form-group-tryon label {
+        font-size: 1rem;
+    }
+
+    .image-upload-area {
+        padding: 1.5rem 1rem;
+    }
+
+    .upload-icon {
+        font-size: 2rem;
+    }
+
+    .image-preview-wrapper {
+        max-width: 100%;
+    }
+
+    .product-url-input {
+        padding: 0.85rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .tryon-submit-btn {
+        padding: 0.95rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+    }
+
+    .product-url-preview img {
+        max-height: 160px;
+    }
+}
