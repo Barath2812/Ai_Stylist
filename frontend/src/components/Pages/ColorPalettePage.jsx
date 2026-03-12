@@ -16,7 +16,14 @@ const ColorPalettePage = () => {
 
     const fetchProfile = async () => {
         try {
+<<<<<<< HEAD
             const response = await api.get('/profile');
+=======
+            const token = localStorage.getItem('token');
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/profile', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             if (response.data.success && response.data.profile) {
                 setProfile(response.data.profile);
             }

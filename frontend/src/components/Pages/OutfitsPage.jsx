@@ -40,7 +40,14 @@ const OutfitsPage = () => {
 
     const loadSavedOutfits = async () => {
         try {
+<<<<<<< HEAD
             const response = await api.get('/outfits');
+=======
+            const token = localStorage.getItem('token');
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             if (response.data.success) {
                 setSavedOutfits(response.data.outfits);
             }
@@ -69,7 +76,12 @@ const OutfitsPage = () => {
 
         try {
             setSearching(true);
+<<<<<<< HEAD
             const response = await api.get('/outfits/search', {
+=======
+            const token = localStorage.getItem('token');
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits/search', {
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 params: {
                     query: searchQuery,
                     category: searchCategory,
@@ -148,7 +160,13 @@ const OutfitsPage = () => {
                 itemCount: itemCount
             };
 
+<<<<<<< HEAD
             const response = await api.post('/outfits/save', outfitData);
+=======
+            const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/outfits/save', outfitData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
 
             if (response.data.success) {
                 alert('Outfit saved successfully! ðŸŽ‰');
@@ -171,7 +189,14 @@ const OutfitsPage = () => {
         if (!confirm('Are you sure you want to delete this outfit?')) return;
 
         try {
+<<<<<<< HEAD
             const response = await api.delete(`/outfits/${outfitId}`);
+=======
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(`https://ai-stylist-6l22.onrender.com/api/outfits/${outfitId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
 
             if (response.data.success) {
                 alert('Outfit deleted!');

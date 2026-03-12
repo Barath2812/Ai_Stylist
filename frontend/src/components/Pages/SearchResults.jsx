@@ -23,8 +23,15 @@ const SearchResults = () => {
             setLoading(true);
             setError('');
 
+<<<<<<< HEAD
             const response = await api.get('/outfits/search', {
                 params: { query, limit: 20 }
+=======
+            const token = localStorage.getItem('token');
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits/search', {
+                params: { query, limit: 20 },
+                headers: { Authorization: `Bearer ${token}` }
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             });
 
             if (response.data.success) {

@@ -14,7 +14,14 @@ const HistoryPage = () => {
 
     const fetchHistory = async () => {
         try {
+<<<<<<< HEAD
             const response = await api.get('/dashboard/stats');
+=======
+            const token = localStorage.getItem('token');
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/dashboard/stats', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             if (response.data.success) {
                 setAnalyses(response.data.recentAnalyses || []);
             }

@@ -60,7 +60,12 @@ const ChatPage = () => {
                 navigate('/login');
                 return;
             }
+<<<<<<< HEAD
             const response = await api.get('/chat/greeting', {
+=======
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/chat/greeting', {
+                headers: { Authorization: `Bearer ${token}` },
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 timeout: REQUEST_TIMEOUT
             });
 
@@ -117,8 +122,13 @@ const ChatPage = () => {
             }
 
             // Send message with conversation history
+<<<<<<< HEAD
             const response = await api.post(
                 '/chat/message',
+=======
+            const response = await axios.post(
+                'https://ai-stylist-6l22.onrender.com/api/chat/message',
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 {
                     message: messageToSend,
                     conversationHistory: messages

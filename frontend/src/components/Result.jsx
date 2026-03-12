@@ -16,7 +16,11 @@ const Result = ({ result, reset }) => {
         const fetchProducts = async () => {
             try {
                 setProductsLoading(true);
+<<<<<<< HEAD
                 const response = await api.post('/products/recommendations', {
+=======
+                const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/products/recommendations', {
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                     profile: profile
                 });
 
@@ -38,8 +42,15 @@ const Result = ({ result, reset }) => {
     const handleSaveProfile = async () => {
         try {
             setSaving(true);
+<<<<<<< HEAD
             const response = await api.post(
                 '/profile/save',
+=======
+            const token = localStorage.getItem('token');
+
+            const response = await axios.post(
+                'https://ai-stylist-6l22.onrender.com/api/profile/save',
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 {
                     profile: profile,
                     photoUrl: result.userImagePath,

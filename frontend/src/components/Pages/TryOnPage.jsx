@@ -74,7 +74,11 @@ const TryOnPage = () => {
             const formData = new FormData();
             formData.append('image', file);
 
+<<<<<<< HEAD
             const uploadRes = await api.post('/virtual-tryon/upload', formData, {
+=======
+            const uploadRes = await axios.post('https://ai-stylist-6l22.onrender.com/api/virtual-tryon/upload', formData, {
+>>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
