@@ -93,7 +93,7 @@ router.post('/extract', async (req, res) => {
         res.json({
             success: true,
             originalImage: imageUrl,
-            extractedImage: `http://localhost:5000${extractedImageUrl}`,
+            extractedImage: `https://ai-stylist-6l22.onrender.com${extractedImageUrl}`,
             extractedPath: outputPath,
             method: result.method
         });
@@ -157,7 +157,7 @@ router.post('/extract-batch', async (req, res) => {
                     results.push({
                         productId: img.productId,
                         success: true,
-                        extractedImage: `http://localhost:5000${extractedImageUrl}`
+                        extractedImage: `https://ai-stylist-6l22.onrender.com${extractedImageUrl}`
                     });
                 } else {
                     results.push({
