@@ -26,7 +26,7 @@ const ProfilePage = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/profile', {
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -47,7 +47,7 @@ const ProfilePage = () => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.put(
-                'http://localhost:5000/api/profile/preferences',
+                'https://ai-stylist-6l22.onrender.com/api/profile/preferences',
                 { preferences },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
