@@ -41,7 +41,7 @@ const OutfitsPage = () => {
     const loadSavedOutfits = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/outfits', {
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.data.success) {
@@ -73,7 +73,7 @@ const OutfitsPage = () => {
         try {
             setSearching(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/outfits/search', {
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits/search', {
                 params: {
                     query: searchQuery,
                     category: searchCategory,
@@ -154,7 +154,7 @@ const OutfitsPage = () => {
                 itemCount: itemCount
             };
 
-            const response = await axios.post('http://localhost:5000/api/outfits/save', outfitData, {
+            const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/outfits/save', outfitData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -180,7 +180,7 @@ const OutfitsPage = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.delete(`http://localhost:5000/api/outfits/${outfitId}`, {
+            const response = await axios.delete(`https://ai-stylist-6l22.onrender.com/api/outfits/${outfitId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
