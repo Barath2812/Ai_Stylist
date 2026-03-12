@@ -16,7 +16,7 @@ const Result = ({ result, reset }) => {
         const fetchProducts = async () => {
             try {
                 setProductsLoading(true);
-                const response = await axios.post('http://localhost:5000/api/products/recommendations', {
+                const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/products/recommendations', {
                     profile: profile
                 });
 
@@ -41,7 +41,7 @@ const Result = ({ result, reset }) => {
             const token = localStorage.getItem('token');
 
             const response = await axios.post(
-                'http://localhost:5000/api/profile/save',
+                'https://ai-stylist-6l22.onrender.com/api/profile/save',
                 {
                     profile: profile,
                     photoUrl: result.userImagePath,
