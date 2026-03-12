@@ -45,7 +45,7 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
         formData.append('occasion', occasion);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/analyze', formData, {
+            const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/analyze', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
