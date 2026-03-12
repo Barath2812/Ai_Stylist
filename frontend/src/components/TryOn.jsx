@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import './TryOn.css';
 
 const TryOn = ({ product, userImagePath, onBack }) => {
@@ -47,7 +47,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             return {
                 type: 'timeout',
                 message: 'The try-on process took too long. This can happen when the AI model is warming up.',
-                tips: ['Try again — the model may be ready now', 'Use a smaller or clearer image', 'The first attempt often takes longer']
+                tips: ['Try again â€” the model may be ready now', 'Use a smaller or clearer image', 'The first attempt often takes longer']
             };
         }
 
@@ -107,11 +107,11 @@ const TryOn = ({ product, userImagePath, onBack }) => {
         }
 
         try {
-            console.log('🎨 Starting virtual try-on...');
+            console.log('ðŸŽ¨ Starting virtual try-on...');
             console.log('User Image:', userImagePath);
             console.log('Product:', product.name);
 
-            const response = await axios.post('http://localhost:5000/api/virtual-tryon', {
+            const response = await api.post('/virtual-tryon', {
                 userImagePath: userImagePath,
                 productImageUrl: product.image
             }, {
@@ -119,7 +119,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             });
 
             if (response.data.success) {
-                console.log('✅ Virtual try-on successful!');
+                console.log('âœ… Virtual try-on successful!');
                 setProgress(100);
                 setRetryCount(0);
                 setTimeout(() => {
@@ -131,14 +131,14 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             }
 
         } catch (err) {
-            console.error('❌ Try-on error:', err);
+            console.error('âŒ Try-on error:', err);
             const classified = classifyError(err);
 
             // Auto-retry for server errors and rate limits
             const currentRetry = isRetry ? retryCount : 0;
             if ((classified.type === 'server' || classified.type === 'rate-limit') && currentRetry < MAX_RETRIES) {
                 const delay = Math.pow(2, currentRetry) * 1000; // 1s, 2s, 4s
-                console.log(`🔄 Retrying in ${delay / 1000}s (attempt ${currentRetry + 1}/${MAX_RETRIES})...`);
+                console.log(`ðŸ”„ Retrying in ${delay / 1000}s (attempt ${currentRetry + 1}/${MAX_RETRIES})...`);
                 setRetryCount(prev => prev + 1);
                 setProgress(5);
                 setTimeout(() => handleTryOn(true), delay);
@@ -156,7 +156,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
         <div className="tryon-container">
             <div className="tryon-header">
                 <button onClick={onBack} className="back-button">
-                    ← Back to Products
+                    â† Back to Products
                 </button>
                 <h2>Virtual Try-On</h2>
                 <p className="product-name">{product.name} - {product.price}</p>
@@ -184,15 +184,15 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             {error && !loading && (
                 <div className="tryon-error">
                     <div className="error-card">
-                        <span className="error-icon">⚠️</span>
+                        <span className="error-icon">âš ï¸</span>
                         <h3>Oops! Something went wrong</h3>
                         <p>{error}</p>
                         <div className="error-actions">
                             <button onClick={handleTryOn} className="retry-button">
-                                🔄 Try Again
+                                ðŸ”„ Try Again
                             </button>
                             <button onClick={onBack} className="back-button-alt">
-                                ← Back to Products
+                                â† Back to Products
                             </button>
                         </div>
                         <div className="error-help">
@@ -222,12 +222,12 @@ const TryOn = ({ product, userImagePath, onBack }) => {
 
                         {/* Arrow */}
                         <div className="comparison-arrow">
-                            <span>→</span>
+                            <span>â†’</span>
                         </div>
 
                         {/* Result Image */}
                         <div className="comparison-item">
-                            <h3>You Wearing It! 🎉</h3>
+                            <h3>You Wearing It! ðŸŽ‰</h3>
                             <div className="image-card result-card">
                                 <img 
                                     src={`data:image/jpeg;base64,${result}`} 
@@ -241,7 +241,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
                     {/* Action Buttons */}
                     <div className="result-actions">
                         <button onClick={handleTryOn} className="try-again-button">
-                            🔄 Try Again
+                            ðŸ”„ Try Again
                         </button>
                         <a 
                             href={product.buyLink} 
@@ -249,10 +249,10 @@ const TryOn = ({ product, userImagePath, onBack }) => {
                             rel="noopener noreferrer"
                             className="buy-button"
                         >
-                            🛒 Buy This Product
+                            ðŸ›’ Buy This Product
                         </a>
                         <button onClick={onBack} className="back-button-primary">
-                            ← Try Other Products
+                            â† Try Other Products
                         </button>
                     </div>
 
@@ -263,7 +263,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
                             download={`tryon-${product.name}.jpg`}
                             className="download-button"
                         >
-                            💾 Download Image
+                            ðŸ’¾ Download Image
                         </a>
                     </div>
                 </div>

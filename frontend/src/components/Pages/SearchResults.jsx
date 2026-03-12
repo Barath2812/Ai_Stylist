@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import './SearchResults.css';
 
 const SearchResults = () => {
@@ -23,10 +23,8 @@ const SearchResults = () => {
             setLoading(true);
             setError('');
 
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/outfits/search', {
-                params: { query, limit: 20 },
-                headers: { Authorization: `Bearer ${token}` }
+            const response = await api.get('/outfits/search', {
+                params: { query, limit: 20 }
             });
 
             if (response.data.success) {
@@ -69,7 +67,7 @@ const SearchResults = () => {
 
             {!loading && !error && products.length === 0 && (
                 <div className="empty-state">
-                    <span className="empty-icon">🔍</span>
+                    <span className="empty-icon">ðŸ”</span>
                     <h3>No products found</h3>
                     <p>Try searching with different keywords</p>
                 </div>
@@ -106,7 +104,7 @@ const SearchResults = () => {
                                     className="btn-outfit-matcher"
                                     onClick={() => tryOutfitMatcher(product)}
                                 >
-                                    🎨 Try Outfit Matcher
+                                    ðŸŽ¨ Try Outfit Matcher
                                 </button>
                                 {product.buyLink && (
                                     <a
@@ -115,7 +113,7 @@ const SearchResults = () => {
                                         rel="noopener noreferrer"
                                         className="btn-view-product"
                                     >
-                                        View Product →
+                                        View Product â†’
                                     </a>
                                 )}
                             </div>

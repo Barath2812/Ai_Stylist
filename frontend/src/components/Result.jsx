@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import './Result.css';
 
 const Result = ({ result, reset }) => {
@@ -16,7 +16,7 @@ const Result = ({ result, reset }) => {
         const fetchProducts = async () => {
             try {
                 setProductsLoading(true);
-                const response = await axios.post('http://localhost:5000/api/products/recommendations', {
+                const response = await api.post('/products/recommendations', {
                     profile: profile
                 });
 
@@ -38,17 +38,12 @@ const Result = ({ result, reset }) => {
     const handleSaveProfile = async () => {
         try {
             setSaving(true);
-            const token = localStorage.getItem('token');
-
-            const response = await axios.post(
-                'http://localhost:5000/api/profile/save',
+            const response = await api.post(
+                '/profile/save',
                 {
                     profile: profile,
                     photoUrl: result.userImagePath,
                     products: products
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` }
                 }
             );
 
@@ -78,7 +73,7 @@ const Result = ({ result, reset }) => {
             {/* Image Quality Badge */}
             {imageQuality && (
                 <div className={`quality-badge quality-${imageQuality.lighting}`}>
-                    <span className="badge-icon">📸</span>
+                    <span className="badge-icon">ðŸ“¸</span>
                     Image Quality: {imageQuality.lighting} lighting, {imageQuality.clarity} clarity
                 </div>
             )}
@@ -89,7 +84,7 @@ const Result = ({ result, reset }) => {
                 {/* Physical Attributes */}
                 <div className="profile-card">
                     <div className="card-header">
-                        <span className="card-icon">👤</span>
+                        <span className="card-icon">ðŸ‘¤</span>
                         <h2>Physical Analysis</h2>
                     </div>
 
@@ -139,7 +134,7 @@ const Result = ({ result, reset }) => {
                         <div className="attribute-item">
                             <label>Hair</label>
                             <div className="attribute-value">
-                                {profile.physical.hair.color} • {profile.physical.hair.texture}
+                                {profile.physical.hair.color} â€¢ {profile.physical.hair.texture}
                             </div>
                         </div>
                     )}
@@ -155,7 +150,7 @@ const Result = ({ result, reset }) => {
                 {/* Body Type */}
                 <div className="profile-card">
                     <div className="card-header">
-                        <span className="card-icon">💪</span>
+                        <span className="card-icon">ðŸ’ª</span>
                         <h2>Body Type</h2>
                     </div>
 
@@ -176,7 +171,7 @@ const Result = ({ result, reset }) => {
                 {/* Style Personality */}
                 <div className="profile-card">
                     <div className="card-header">
-                        <span className="card-icon">✨</span>
+                        <span className="card-icon">âœ¨</span>
                         <h2>Style Personality</h2>
                     </div>
 
@@ -212,7 +207,7 @@ const Result = ({ result, reset }) => {
                 {/* Color Palette - Full Width */}
                 <div className="profile-card full-width">
                     <div className="card-header">
-                        <span className="card-icon">🎨</span>
+                        <span className="card-icon">ðŸŽ¨</span>
                         <h2>Your Complete Color Palette</h2>
                     </div>
 
@@ -284,7 +279,7 @@ const Result = ({ result, reset }) => {
                 {/* Recommendations */}
                 <div className="profile-card full-width">
                     <div className="card-header">
-                        <span className="card-icon">💡</span>
+                        <span className="card-icon">ðŸ’¡</span>
                         <h2>Personalized Recommendations</h2>
                     </div>
 
@@ -341,7 +336,7 @@ const Result = ({ result, reset }) => {
                 {/* AI Curated Products Section */}
                 <div className="profile-card full-width">
                     <div className="card-header">
-                        <span className="card-icon">🛍️</span>
+                        <span className="card-icon">ðŸ›ï¸</span>
                         <h2>Curated For You</h2>
                     </div>
 
@@ -403,7 +398,7 @@ const Result = ({ result, reset }) => {
                     onClick={reset}
                     disabled={saving}
                 >
-                    ← Analyze Another Photo
+                    â† Analyze Another Photo
                 </button>
 
                 <button
@@ -411,7 +406,7 @@ const Result = ({ result, reset }) => {
                     onClick={handleSaveProfile}
                     disabled={saving || saved}
                 >
-                    {saving ? 'Saving...' : saved ? '✓ Profile Saved!' : '💾 Save My Profile'}
+                    {saving ? 'Saving...' : saved ? 'âœ“ Profile Saved!' : 'ðŸ’¾ Save My Profile'}
                 </button>
             </div>
 

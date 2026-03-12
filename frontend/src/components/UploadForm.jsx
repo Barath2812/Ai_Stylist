@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const UploadForm = ({ setResult, setLoading, setError, loading }) => {
     const [file, setFile] = useState(null);
@@ -45,7 +45,7 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
         formData.append('occasion', occasion);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/analyze', formData, {
+            const response = await api.post('/analyze', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
@@ -91,12 +91,12 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
                                 setFile(null);
                                 setPreview(null);
                             }}>
-                                ×
+                                Ã—
                             </button>
                         </div>
                     ) : (
                         <div>
-                            <span className="upload-icon">📸</span>
+                            <span className="upload-icon">ðŸ“¸</span>
                             <h3>Upload your style</h3>
                             <p>Tap to Browse or Drag Photo</p>
                         </div>

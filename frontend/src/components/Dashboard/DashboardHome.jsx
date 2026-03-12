@@ -1,7 +1,7 @@
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import './DashboardHome.css';
 
 const DashboardHome = () => {
@@ -21,10 +21,7 @@ const DashboardHome = () => {
 
     const fetchProfile = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/profile', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/profile');
             if (response.data.success) {
                 setProfile(response.data.profile);
             }
@@ -35,10 +32,7 @@ const DashboardHome = () => {
 
     const fetchStats = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/outfits', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/outfits');
             if (response.data.success) {
                 setStats(prev => ({
                     ...prev,
@@ -65,14 +59,14 @@ const DashboardHome = () => {
     return (
         <div className="dashboard-home">
             <div className="welcome-section">
-                <h1>Welcome back, {user?.name}! 👋</h1>
+                <h1>Welcome back, {user?.name}! ðŸ‘‹</h1>
                 <p>Your personal AI stylist is ready to help you look your best</p>
             </div>
 
             {/* Stats Cards */}
             <div className="stats-grid">
                 <div className="stat-card">
-                    <div className="stat-icon">🎨</div>
+                    <div className="stat-icon">ðŸŽ¨</div>
                     <div className="stat-content">
                         <h3>{stats.outfitsCreated}</h3>
                         <p>Outfits Created</p>
@@ -80,7 +74,7 @@ const DashboardHome = () => {
                 </div>
 
                 <div className="stat-card">
-                    <div className="stat-icon">🏆</div>
+                    <div className="stat-icon">ðŸ†</div>
                     <div className="stat-content">
                         <h3>{stats.challengesJoined}</h3>
                         <p>Challenges Joined</p>
@@ -88,7 +82,7 @@ const DashboardHome = () => {
                 </div>
 
                 <div className="stat-card">
-                    <div className="stat-icon">⭐</div>
+                    <div className="stat-icon">â­</div>
                     <div className="stat-content">
                         <h3>{calculateCompletion()}%</h3>
                         <p>Profile Complete</p>
@@ -104,7 +98,7 @@ const DashboardHome = () => {
                         className="action-card"
                         onClick={() => navigate('/dashboard/upload')}
                     >
-                        <span className="action-icon">📸</span>
+                        <span className="action-icon">ðŸ“¸</span>
                         <h3>Analyze Photo</h3>
                         <p>Get your personalized style profile</p>
                     </div>
@@ -113,7 +107,7 @@ const DashboardHome = () => {
                         className="action-card"
                         onClick={() => navigate('/dashboard/outfits')}
                     >
-                        <span className="action-icon">👔</span>
+                        <span className="action-icon">ðŸ‘”</span>
                         <h3>Build Outfit</h3>
                         <p>Mix and match your perfect look</p>
                     </div>
@@ -122,7 +116,7 @@ const DashboardHome = () => {
                         className="action-card"
                         onClick={() => navigate('/dashboard/chat')}
                     >
-                        <span className="action-icon">💬</span>
+                        <span className="action-icon">ðŸ’¬</span>
                         <h3>Ask AI Stylist</h3>
                         <p>Get personalized fashion advice</p>
                     </div>
@@ -131,7 +125,7 @@ const DashboardHome = () => {
                         className="action-card"
                         onClick={() => navigate('/dashboard/profile')}
                     >
-                        <span className="action-icon">👤</span>
+                        <span className="action-icon">ðŸ‘¤</span>
                         <h3>View Profile</h3>
                         <p>See your complete style analysis</p>
                     </div>
@@ -164,7 +158,7 @@ const DashboardHome = () => {
                         className="btn-view-full"
                         onClick={() => navigate('/dashboard/profile')}
                     >
-                        View Full Profile →
+                        View Full Profile â†’
                     </button>
                 </div>
             ) : (

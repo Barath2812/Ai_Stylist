@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import api from '../../api/axios';
 import TryOn from '../TryOn';
 import './TryOnPage.css';
 
@@ -74,7 +74,7 @@ const TryOnPage = () => {
             const formData = new FormData();
             formData.append('image', file);
 
-            const uploadRes = await axios.post('http://localhost:5000/api/virtual-tryon/upload', formData, {
+            const uploadRes = await api.post('/virtual-tryon/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
@@ -156,12 +156,12 @@ const TryOnPage = () => {
                                             setPreview(null);
                                         }}
                                     >
-                                        ×
+                                        Ã—
                                     </button>
                                 </div>
                             ) : (
                                 <div>
-                                    <span className="upload-icon">📸</span>
+                                    <span className="upload-icon">ðŸ“¸</span>
                                     <h3>Tap or Click to Upload</h3>
                                 </div>
                             )}
@@ -201,7 +201,7 @@ const TryOnPage = () => {
                                 />
                                 {urlValid === false && (
                                     <p style={{ color: 'var(--danger)', fontSize: '0.85rem', marginTop: '0.5rem', textAlign: 'center' }}>
-                                        ⚠️ Could not load image. Please check the URL.
+                                        âš ï¸ Could not load image. Please check the URL.
                                     </p>
                                 )}
                             </div>
@@ -218,7 +218,7 @@ const TryOnPage = () => {
                                 <div className="small-spinner"></div>
                                 Preparing Magic...
                             </>
-                        ) : 'Start Virtual Try-On ✨'}
+                        ) : 'Start Virtual Try-On âœ¨'}
                     </button>
                 </form>
             </div>

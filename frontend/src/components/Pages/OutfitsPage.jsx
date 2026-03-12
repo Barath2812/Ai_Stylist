@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import './Outfit.css';
 
 const OutfitsPage = () => {
@@ -40,10 +40,7 @@ const OutfitsPage = () => {
 
     const loadSavedOutfits = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/outfits', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/outfits');
             if (response.data.success) {
                 setSavedOutfits(response.data.outfits);
             }
@@ -72,14 +69,12 @@ const OutfitsPage = () => {
 
         try {
             setSearching(true);
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/outfits/search', {
+            const response = await api.get('/outfits/search', {
                 params: {
                     query: searchQuery,
                     category: searchCategory,
                     limit: 12
-                },
-                headers: { Authorization: `Bearer ${token}` }
+                }
             });
 
             if (response.data.success) {
@@ -123,7 +118,7 @@ const OutfitsPage = () => {
         let total = 0;
         Object.values(outfitItems).forEach(item => {
             if (item && item.price) {
-                // Extract number from price string (₹1,299 -> 1299)
+                // Extract number from price string (â‚¹1,299 -> 1299)
                 const priceNum = parseInt(item.price.replace(/[^\d]/g, ''));
                 if (!isNaN(priceNum)) {
                     total += priceNum;
@@ -146,7 +141,6 @@ const OutfitsPage = () => {
         }
 
         try {
-            const token = localStorage.getItem('token');
             const outfitData = {
                 name: outfitName,
                 items: outfitItems,
@@ -154,12 +148,10 @@ const OutfitsPage = () => {
                 itemCount: itemCount
             };
 
-            const response = await axios.post('http://localhost:5000/api/outfits/save', outfitData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.post('/outfits/save', outfitData);
 
             if (response.data.success) {
-                alert('Outfit saved successfully! 🎉');
+                alert('Outfit saved successfully! ðŸŽ‰');
                 loadSavedOutfits();
                 setShowSaveModal(false);
                 clearOutfit();
@@ -179,10 +171,7 @@ const OutfitsPage = () => {
         if (!confirm('Are you sure you want to delete this outfit?')) return;
 
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.delete(`http://localhost:5000/api/outfits/${outfitId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.delete(`/outfits/${outfitId}`);
 
             if (response.data.success) {
                 alert('Outfit deleted!');
@@ -220,7 +209,7 @@ const OutfitsPage = () => {
                         <div className={`outfit-slot-v2 ${outfitItems.top ? 'filled' : 'empty'}`}>
                             {outfitItems.top ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('top')}>×</button>
+                                    <button className="remove-btn" onClick={() => removeItem('top')}>Ã—</button>
                                     <img src={outfitItems.top.image} alt={outfitItems.top.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.top.name}</p>
@@ -229,7 +218,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('top')}>
-                                    <span className="select-icon">👔</span>
+                                    <span className="select-icon">ðŸ‘”</span>
                                     <span>Select Shirt/Top</span>
                                 </button>
                             )}
@@ -239,7 +228,7 @@ const OutfitsPage = () => {
                         <div className={`outfit-slot-v2 ${outfitItems.bottom ? 'filled' : 'empty'}`}>
                             {outfitItems.bottom ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('bottom')}>×</button>
+                                    <button className="remove-btn" onClick={() => removeItem('bottom')}>Ã—</button>
                                     <img src={outfitItems.bottom.image} alt={outfitItems.bottom.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.bottom.name}</p>
@@ -248,7 +237,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('bottom')}>
-                                    <span className="select-icon">👖</span>
+                                    <span className="select-icon">ðŸ‘–</span>
                                     <span>Select Pants</span>
                                 </button>
                             )}
@@ -258,7 +247,7 @@ const OutfitsPage = () => {
                         <div className={`outfit-slot-v2 ${outfitItems.shoes ? 'filled' : 'empty'}`}>
                             {outfitItems.shoes ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('shoes')}>×</button>
+                                    <button className="remove-btn" onClick={() => removeItem('shoes')}>Ã—</button>
                                     <img src={outfitItems.shoes.image} alt={outfitItems.shoes.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.shoes.name}</p>
@@ -267,7 +256,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('shoes')}>
-                                    <span className="select-icon">👞</span>
+                                    <span className="select-icon">ðŸ‘ž</span>
                                     <span>Select Shoes</span>
                                 </button>
                             )}
@@ -277,7 +266,7 @@ const OutfitsPage = () => {
                         <div className={`outfit-slot-v2 ${outfitItems.accessories ? 'filled' : 'empty'}`}>
                             {outfitItems.accessories ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('accessories')}>×</button>
+                                    <button className="remove-btn" onClick={() => removeItem('accessories')}>Ã—</button>
                                     <img src={outfitItems.accessories.image} alt={outfitItems.accessories.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.accessories.name}</p>
@@ -286,7 +275,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('accessories')}>
-                                    <span className="select-icon">⌚</span>
+                                    <span className="select-icon">âŒš</span>
                                     <span>Select Accessories</span>
                                 </button>
                             )}
@@ -297,7 +286,7 @@ const OutfitsPage = () => {
                     <div className="outfit-summary">
                         <div className="total-price">
                             <span>Total:</span>
-                            <span className="price-value">₹{calculateTotal().toLocaleString()}</span>
+                            <span className="price-value">â‚¹{calculateTotal().toLocaleString()}</span>
                         </div>
                         <div className="outfit-actions">
                             <button className="btn-clear" onClick={clearOutfit}>
@@ -324,14 +313,14 @@ const OutfitsPage = () => {
                             <div key={outfit.id} className="saved-outfit-card">
                                 <div className="outfit-card-header">
                                     <h3>{outfit.name}</h3>
-                                    <button className="delete-btn" onClick={() => deleteOutfit(outfit.id)}>🗑️</button>
+                                    <button className="delete-btn" onClick={() => deleteOutfit(outfit.id)}>ðŸ—‘ï¸</button>
                                 </div>
                                 <div className="outfit-preview-images">
                                     {Object.values(outfit.items).filter(item => item).map((item, idx) => (
                                         <img key={idx} src={item.image} alt={item.name} className="mini-preview" />
                                     ))}
                                 </div>
-                                <p className="outfit-total">₹{outfit.totalPrice?.toLocaleString() || 0}</p>
+                                <p className="outfit-total">â‚¹{outfit.totalPrice?.toLocaleString() || 0}</p>
                                 <button className="btn-load" onClick={() => loadOutfit(outfit)}>
                                     Load Outfit
                                 </button>
@@ -347,7 +336,7 @@ const OutfitsPage = () => {
                     <div className="modal-content-search" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>Search {categoryLabels[searchCategory]}</h2>
-                            <button className="close-modal-btn" onClick={closeSearchModal}>×</button>
+                            <button className="close-modal-btn" onClick={closeSearchModal}>Ã—</button>
                         </div>
 
                         <form className="modal-search-form" onSubmit={searchProducts}>

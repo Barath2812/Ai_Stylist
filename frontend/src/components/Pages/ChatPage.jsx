@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import './ChatPage.css';
 
 const ChatPage = () => {
@@ -60,8 +60,7 @@ const ChatPage = () => {
                 navigate('/login');
                 return;
             }
-            const response = await axios.get('http://localhost:5000/api/chat/greeting', {
-                headers: { Authorization: `Bearer ${token}` },
+            const response = await api.get('/chat/greeting', {
                 timeout: REQUEST_TIMEOUT
             });
 
@@ -84,8 +83,8 @@ const ChatPage = () => {
             setMessages([{
                 role: 'assistant',
                 message: error.code === 'ERR_NETWORK' 
-                    ? "⚠️ Cannot connect to the server. Please check if the backend is running."
-                    : "👋 Hi! I'm your AI Style Assistant! How can I help you today?",
+                    ? "âš ï¸ Cannot connect to the server. Please check if the backend is running."
+                    : "ðŸ‘‹ Hi! I'm your AI Style Assistant! How can I help you today?",
                 timestamp: new Date().toISOString()
             }]);
         }
@@ -118,14 +117,13 @@ const ChatPage = () => {
             }
 
             // Send message with conversation history
-            const response = await axios.post(
-                'http://localhost:5000/api/chat/message',
+            const response = await api.post(
+                '/chat/message',
                 {
                     message: messageToSend,
                     conversationHistory: messages
                 },
                 {
-                    headers: { Authorization: `Bearer ${token}` },
                     timeout: REQUEST_TIMEOUT
                 }
             );
@@ -160,12 +158,12 @@ const ChatPage = () => {
 
             let errorMsg = "Sorry, I couldn't process that. Please try again!";
             if (error.code === 'ERR_NETWORK') {
-                errorMsg = "⚠️ Cannot reach the server. Please check your connection.";
+                errorMsg = "âš ï¸ Cannot reach the server. Please check your connection.";
                 setConnectionError(true);
             } else if (error.code === 'ECONNABORTED') {
-                errorMsg = "⏱️ Request timed out. The server might be busy — try again.";
+                errorMsg = "â±ï¸ Request timed out. The server might be busy â€” try again.";
             } else if (error.response?.status >= 500) {
-                errorMsg = "🔧 Server error. Please try again in a moment.";
+                errorMsg = "ðŸ”§ Server error. Please try again in a moment.";
             }
 
             const errorMessage = {
@@ -201,10 +199,10 @@ const ChatPage = () => {
             {/* Chat Header */}
             <div className="chat-header">
                 <div className="chat-header-content">
-                    <div className="chat-avatar">🤖</div>
+                    <div className="chat-avatar">ðŸ¤–</div>
                     <div className="chat-info">
                         <h2>AI Style Assistant</h2>
-                        <p className="chat-status">Online •  Ready to help</p>
+                        <p className="chat-status">Online â€¢  Ready to help</p>
                     </div>
                 </div>
             </div>
@@ -234,7 +232,7 @@ const ChatPage = () => {
                                                 <span className="chat-product-source">{product.source}</span>
                                             </div>
                                             <button className="chat-product-btn">
-                                                Add to Outfit →
+                                                Add to Outfit â†’
                                             </button>
                                         </div>
                                     ))}
@@ -301,11 +299,11 @@ const ChatPage = () => {
                         onClick={() => handleSendMessage()}
                         disabled={loading || !inputMessage.trim()}
                     >
-                        {loading ? '...' : '→'}
+                        {loading ? '...' : 'â†’'}
                     </button>
                 </div>
                 <p className="chat-hint">
-                    💡 Try asking: "What colors suit me?" or "Help me with an outfit"
+                    ðŸ’¡ Try asking: "What colors suit me?" or "Help me with an outfit"
                 </p>
             </div>
         </div>

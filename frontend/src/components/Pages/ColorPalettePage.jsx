@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
 import './ColorPalette.css';
 
 const ColorPalettePage = () => {
@@ -16,10 +16,7 @@ const ColorPalettePage = () => {
 
     const fetchProfile = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/profile', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const response = await api.get('/profile');
             if (response.data.success && response.data.profile) {
                 setProfile(response.data.profile);
             }
@@ -53,7 +50,7 @@ const ColorPalettePage = () => {
         return (
             <div className="color-page">
                 <div className="color-empty">
-                    <div className="empty-icon">🎨</div>
+                    <div className="empty-icon">ðŸŽ¨</div>
                     <h2>No Color Palette Yet</h2>
                     <p>Upload a photo to get your personalized color analysis based on your skin tone and features.</p>
                     <button className="btn-analyze" onClick={() => navigate('/dashboard/upload')}>
@@ -65,10 +62,10 @@ const ColorPalettePage = () => {
     }
 
     const tabs = [
-        { key: 'best', label: 'Best Colors', emoji: '✨', count: palette.best?.length || 0 },
-        { key: 'accent', label: 'Accent Colors', emoji: '💎', count: palette.accent?.length || 0 },
-        { key: 'avoid', label: 'Avoid', emoji: '🚫', count: palette.avoid?.length || 0 },
-        { key: 'neutrals', label: 'Neutrals', emoji: '⚪', count: palette.neutrals?.length || 0 }
+        { key: 'best', label: 'Best Colors', emoji: 'âœ¨', count: palette.best?.length || 0 },
+        { key: 'accent', label: 'Accent Colors', emoji: 'ðŸ’Ž', count: palette.accent?.length || 0 },
+        { key: 'avoid', label: 'Avoid', emoji: 'ðŸš«', count: palette.avoid?.length || 0 },
+        { key: 'neutrals', label: 'Neutrals', emoji: 'âšª', count: palette.neutrals?.length || 0 }
     ];
 
     const renderColorCard = (color, index) => {
@@ -93,7 +90,7 @@ const ColorPalettePage = () => {
             >
                 <div className="color-preview" style={{ background: color.hex }}>
                     <div className="color-hex-overlay">
-                        {copiedColor === color.name ? '✓ Copied!' : color.hex}
+                        {copiedColor === color.name ? 'âœ“ Copied!' : color.hex}
                     </div>
                 </div>
                 <div className="color-details">
@@ -132,7 +129,7 @@ const ColorPalettePage = () => {
                         </div>
                         {profile.physical.skinTone.undertone && (
                             <div className="skin-chip">
-                                <span>🌡️ {profile.physical.skinTone.undertone} Undertone</span>
+                                <span>ðŸŒ¡ï¸ {profile.physical.skinTone.undertone} Undertone</span>
                             </div>
                         )}
                     </div>
@@ -159,7 +156,7 @@ const ColorPalettePage = () => {
 
             {activeTab === 'best' && (
                 <div className="color-tip">
-                    <span className="tip-icon">💡</span>
+                    <span className="tip-icon">ðŸ’¡</span>
                     <p>Click any color to copy its hex code. Use these as your go-to wardrobe colors!</p>
                 </div>
             )}
