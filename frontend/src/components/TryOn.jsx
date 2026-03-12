@@ -111,7 +111,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             console.log('User Image:', userImagePath);
             console.log('Product:', product.name);
 
-            const response = await axios.post('http://localhost:5000/api/virtual-tryon', {
+            const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/virtual-tryon', {
                 userImagePath: userImagePath,
                 productImageUrl: product.image
             }, {
