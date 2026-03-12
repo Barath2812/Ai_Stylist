@@ -17,7 +17,7 @@ const ColorPalettePage = () => {
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/profile', {
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.data.success && response.data.profile) {
