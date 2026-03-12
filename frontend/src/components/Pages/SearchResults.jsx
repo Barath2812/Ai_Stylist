@@ -24,7 +24,7 @@ const SearchResults = () => {
             setError('');
 
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/outfits/search', {
+            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits/search', {
                 params: { query, limit: 20 },
                 headers: { Authorization: `Bearer ${token}` }
             });
