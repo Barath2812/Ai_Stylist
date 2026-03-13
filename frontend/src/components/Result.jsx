@@ -398,7 +398,7 @@ const Result = ({ result, reset }) => {
                     onClick={reset}
                     disabled={saving}
                 >
-                    â† Analyze Another Photo
+                    Analyze Another Photo
                 </button>
 
                 <button
@@ -406,7 +406,7 @@ const Result = ({ result, reset }) => {
                     onClick={handleSaveProfile}
                     disabled={saving || saved}
                 >
-                    {saving ? 'Saving...' : saved ? 'âœ“ Profile Saved!' : 'ðŸ’¾ Save My Profile'}
+                    {saving ? 'Saving...' : saved ? ' Profile Saved!' : ' Save My Profile'}
                 </button>
             </div>
 

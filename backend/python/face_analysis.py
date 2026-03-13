@@ -1,4 +1,5 @@
 import sys
+import os
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -225,10 +226,25 @@ def main():
     occasion = sys.argv[2]
 
     try:
+        # Load image and resize if too large (>8MB)
         image = cv2.imread(image_path)
         if image is None:
             print(json.dumps({"error": "Could not read image"}))
             return
+
+        # Check file size and resize if needed (prevent memory issues)
+        file_size_mb = os.path.getsize(image_path) / (1024 * 1024)
+        if file_size_mb > 8:
+            print(f"Image >8MB ({file_size_mb:.1f}MB), resizing...", file=sys.stderr)
+            height, width = image.shape[:2]
+            if width > height:
+                new_width = 1920
+                new_height = int(height * (new_width / width))
+            else:
+                new_height = 1920
+                new_width = int(width * (new_height / height))
+            image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
+            print(f"Resized to {new_width}x{new_height}", file=sys.stderr)
 
         # Check image quality first
         quality_check = check_image_quality(image)
