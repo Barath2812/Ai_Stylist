@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -62,46 +63,48 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
 
     console.log(`Analyzing image: ${absoluteImagePath} for occasion: ${occasion}`);
 
-    // Spawn Python process for face analysis
-    const pythonProcess = spawn('python', [scriptPath, absoluteImagePath, occasion]);
+    // Direct Python spawn (bypasses port 7070 dependency)
+        const pythonProcess = spawn('python', [
+            path.join(__dirname, '../python/face_analysis.py'), 
+            absoluteImagePath, 
+            occasion
+        ], {
+            cwd: path.join(__dirname, '..'),
+            stdio: ['ignore', 'pipe', 'pipe']
+        });
 
-    let dataString = '';
-    let errorString = '';
+        let dataString = '';
+        let errorString = '';
 
-    pythonProcess.stdout.on('data', (data) => {
-        dataString += data.toString();
-    });
+        pythonProcess.stdout.on('data', (data) => { dataString += data.toString(); });
+        pythonProcess.stderr.on('data', (data) => { errorString += data.toString(); });
 
-    pythonProcess.stderr.on('data', (data) => {
-        errorString += data.toString();
-    });
+        // Wait for Python to complete
+        await new Promise((resolve, reject) => {
+            pythonProcess.on('close', (code) => {
+                if (code !== 0) {
+                    const err = new Error(`Python exit ${code}: ${errorString}`);
+                    console.error('Python Error:', err.message);
+                    reject(err);
+                    return;
+                }
+                resolve();
+            });
+        });
+        // Parse Python JSON output once, post-spawn
+        const startIdx = dataString.indexOf('{');
+        const endIdx = dataString.lastIndexOf('}') + 1;
+        if (startIdx === -1 || endIdx <= startIdx) {
+            throw new Error('No valid JSON in Python output');
+        }
+        const analysisResult = JSON.parse(dataString.slice(startIdx, endIdx));
+        console.log("✅ Face Analysis Complete:", analysisResult);
 
-    pythonProcess.on('close', async (code) => {
-        console.log(`Python process exited with code ${code}`);
-
-        if (code !== 0) {
-            console.error('Python Error:', errorString);
-            return res.status(500).json({ error: 'Analysis failed', details: errorString });
+        if (analysisResult.error) {
+            return res.status(400).json({ error: analysisResult.error });
         }
 
         try {
-            // Parse Python output
-            const jsonStartIndex = dataString.indexOf('{');
-            const jsonEndIndex = dataString.lastIndexOf('}');
-
-            if (jsonStartIndex === -1 || jsonEndIndex === -1) {
-                throw new Error("No JSON found in python output");
-            }
-
-            const cleanJsonString = dataString.substring(jsonStartIndex, jsonEndIndex + 1);
-            const analysisResult = JSON.parse(cleanJsonString);
-
-            if (analysisResult.error) {
-                return res.status(400).json({ error: analysisResult.error });
-            }
-
-            console.log("✅ Face Analysis Complete:", analysisResult);
-
             let styleProfile = null;
 
             try {
@@ -122,8 +125,7 @@ VERIFIED PHYSICAL DATA (from precise measurements):
 - Facial Symmetry: ${Math.round((analysisResult.facialSymmetry || 0.85) * 100)}%
 - Occasion Context: ${occasion}
 
-ANALYZE THIS IMAGE AND PROVIDE:
-
+ANALYZE THIS IMAGE AND PR
 1. BODY TYPE:
    - Category (Ectomorph/Mesomorph/Endomorph)
    - Build description
@@ -225,11 +227,15 @@ IMPORTANT: Return ONLY the JSON, no markdown, no explanation.
                     console.log("✅ Gemini Deep Analysis Complete!");
 
                 } else {
-                    console.log("⚠️ No Gemini API key, using basic analysis");
+                    throw new Error("GEMINI_API_KEY required for style analysis");
                 }
             } catch (geminiError) {
                 console.error("❌ Gemini Error:", geminiError.message);
-                console.log("⚠️ Continuing with Python data only");
+                throw new Error(`Style analysis failed: ${geminiError.message}`);
+            }
+
+            if (!styleProfile) {
+                throw new Error("No style profile generated");
             }
 
             // ============================================
@@ -237,48 +243,16 @@ IMPORTANT: Return ONLY the JSON, no markdown, no explanation.
             // ============================================
 
             const completeProfile = {
-                // Python precise data
                 physical: {
-                    faceShape: analysisResult.faceShapeData || {
-                        type: analysisResult.faceShape,
-                        confidence: 0.8
-                    },
-                    skinTone: analysisResult.skinToneData || {
-                        category: analysisResult.skinTone,
-                        undertone: "Neutral",
-                        hex: "#C68642"
-                    },
+                    faceShape: analysisResult.faceShapeData || { type: analysisResult.faceShape, confidence: 0.8 },
+                    skinTone: analysisResult.skinToneData || { category: analysisResult.skinTone, undertone: "Neutral", hex: "#C68642" },
                     facialSymmetry: analysisResult.facialSymmetry || 0.85,
-
-                    // Gemini intelligent data
-                    ...(styleProfile?.physical && {
-                        hair: styleProfile.physical.hair,
-                        eyes: styleProfile.physical.eyes
-                    })
+                    ...styleProfile.physical  // hair, eyes, beardStyle from Gemini
                 },
-
-                bodyType: styleProfile?.bodyType || {
-                    category: "Average",
-                    recommendation: "Standard fits recommended"
-                },
-
-                stylePersonality: styleProfile?.stylePersonality || {
-                    primary: { type: "Smart Casual", percentage: 70 },
-                    maturity: "Modern"
-                },
-
-                colorPalette: styleProfile?.colorPalette || {
-                    best: getColorRecommendations(analysisResult.skinTone, occasion).map(c => ({ name: c, hex: "#000000" })),
-                    accent: [],
-                    avoid: [],
-                    neutrals: ["Black", "White", "Grey"]
-                },
-
-                recommendations: styleProfile?.recommendations || {
-                    ...getStyleRecommendations(analysisResult.faceShape),
-                    direction: "Classic style suits you well"
-                },
-
+                bodyType: styleProfile.bodyType,
+                stylePersonality: styleProfile.stylePersonality,
+                colorPalette: styleProfile.colorPalette,
+                recommendations: styleProfile.recommendations,
                 occasion: occasion,
                 analyzedAt: new Date()
             };
@@ -291,9 +265,9 @@ IMPORTANT: Return ONLY the JSON, no markdown, no explanation.
                 occasion: occasion,
                 faceShape: analysisResult.faceShape,
                 skinTone: analysisResult.skinTone,
-                outfit: styleProfile?.stylePersonality?.primary?.type || 'Smart Casual',
-                hairstyle: styleProfile?.recommendations?.necklines?.[0] || getStyleRecommendations(analysisResult.faceShape).hairstyle,
-                beardStyle: getStyleRecommendations(analysisResult.faceShape).beardStyle,
+                outfit: styleProfile.stylePersonality.primary.type,
+                hairstyle: styleProfile.physical.hair.style || "Short",
+                beardStyle: styleProfile.physical.beardStyle || "Clean Shaven",
             });
 
             await newResult.save();
@@ -302,7 +276,7 @@ IMPORTANT: Return ONLY the JSON, no markdown, no explanation.
             // SAVE FULL PROFILE TO USER
             // ============================================
             try {
-                const userId = req.userId || 'temp-user'; // Add auth middleware later
+                const userId = req.userId || 'temp-user';
                 const User = require('../models/User');
                 let user = await User.findOne({ email: userId });
                 
@@ -371,6 +345,6 @@ IMPORTANT: Return ONLY the JSON, no markdown, no explanation.
             });
         }
     });
-});
+;
 
 module.exports = router;

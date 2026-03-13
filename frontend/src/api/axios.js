@@ -1,8 +1,11 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://ai-stylist-6l22.onrender.com/api',
+    baseURL: window.location.hostname === 'localhost' 
+        ? 'http://localhost:5000/api'
+        : 'https://ai-stylist-6l22.onrender.com/api',
 });
+
 
 api.interceptors.request.use(
     (config) => {
