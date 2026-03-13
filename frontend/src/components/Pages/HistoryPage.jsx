@@ -14,14 +14,7 @@ const HistoryPage = () => {
 
     const fetchHistory = async () => {
         try {
-<<<<<<< HEAD
             const response = await api.get('/dashboard/stats');
-=======
-            const token = localStorage.getItem('token');
-            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/dashboard/stats', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             if (response.data.success) {
                 setAnalyses(response.data.recentAnalyses || []);
             }
@@ -51,16 +44,16 @@ const HistoryPage = () => {
 
     const getOccasionEmoji = (occasion) => {
         const emojis = {
-            'Formal': 'ðŸŽ©',
-            'Semi-Formal': 'ðŸ‘”',
-            'Casual': 'ðŸ‘•',
-            'Party': 'ðŸŽ‰',
-            'Wedding': 'ðŸ’',
-            'Date': 'â¤ï¸',
-            'Office': 'ðŸ’¼',
-            'Interview': 'ðŸ“‹'
+            'Formal': '🎩',
+            'Semi-Formal': '👔',
+            'Casual': '👕',
+            'Party': '🎉',
+            'Wedding': '💍',
+            'Date': '❤️',
+            'Office': '💼',
+            'Interview': '📋'
         };
-        return emojis[occasion] || 'ðŸŽ¨';
+        return emojis[occasion] || '🎨';
     };
 
     if (loading) {
@@ -89,7 +82,7 @@ const HistoryPage = () => {
 
             {analyses.length === 0 ? (
                 <div className="history-empty">
-                    <div className="empty-icon">ðŸ“ˆ</div>
+                    <div className="empty-icon">📊</div>
                     <h2>No Style History Yet</h2>
                     <p>Start by uploading a photo to get your first style analysis. Each analysis will be tracked here so you can see your style evolution.</p>
                     <button className="btn-start" onClick={() => navigate('/dashboard/upload')}>
@@ -124,19 +117,19 @@ const HistoryPage = () => {
                                     <div className="analysis-details">
                                         {analysis.faceShape && (
                                             <div className="detail-chip">
-                                                <span className="chip-icon">ðŸ“</span>
+                                                <span className="chip-icon">📐</span>
                                                 <span>{analysis.faceShape}</span>
                                             </div>
                                         )}
                                         {analysis.skinTone && (
                                             <div className="detail-chip">
-                                                <span className="chip-icon">ðŸŽ¨</span>
+                                                <span className="chip-icon">🎨</span>
                                                 <span>{analysis.skinTone}</span>
                                             </div>
                                         )}
                                         {analysis.colors && analysis.colors.length > 0 && (
                                             <div className="detail-chip">
-                                                <span className="chip-icon">ðŸŒˆ</span>
+                                                <span className="chip-icon">🌈</span>
                                                 <span>{analysis.colors.length} Colors</span>
                                             </div>
                                         )}

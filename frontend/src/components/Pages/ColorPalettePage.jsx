@@ -16,14 +16,7 @@ const ColorPalettePage = () => {
 
     const fetchProfile = async () => {
         try {
-<<<<<<< HEAD
             const response = await api.get('/profile');
-=======
-            const token = localStorage.getItem('token');
-            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/profile', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             if (response.data.success && response.data.profile) {
                 setProfile(response.data.profile);
             }
@@ -47,7 +40,7 @@ const ColorPalettePage = () => {
             <div className="color-page">
                 <div className="color-loading">
                     <div className="loading-spinner"></div>
-                    <p>Loading your color palette...</p>
+                    <p>&#9203; Loading your color palette...</p>
                 </div>
             </div>
         );
@@ -57,11 +50,11 @@ const ColorPalettePage = () => {
         return (
             <div className="color-page">
                 <div className="color-empty">
-                    <div className="empty-icon">ðŸŽ¨</div>
+                    <div className="empty-icon">&#127912;</div>
                     <h2>No Color Palette Yet</h2>
                     <p>Upload a photo to get your personalized color analysis based on your skin tone and features.</p>
                     <button className="btn-analyze" onClick={() => navigate('/dashboard/upload')}>
-                        Analyze My Colors
+                        &#128269; Analyze My Colors
                     </button>
                 </div>
             </div>
@@ -69,10 +62,10 @@ const ColorPalettePage = () => {
     }
 
     const tabs = [
-        { key: 'best', label: 'Best Colors', emoji: 'âœ¨', count: palette.best?.length || 0 },
-        { key: 'accent', label: 'Accent Colors', emoji: 'ðŸ’Ž', count: palette.accent?.length || 0 },
-        { key: 'avoid', label: 'Avoid', emoji: 'ðŸš«', count: palette.avoid?.length || 0 },
-        { key: 'neutrals', label: 'Neutrals', emoji: 'âšª', count: palette.neutrals?.length || 0 }
+        { key: 'best', label: ' Best Colors', emoji: '⭐', count: palette.best?.length || 0 },
+        { key: 'accent', label: ' Accent Colors', emoji: '✨', count: palette.accent?.length || 0 },
+        { key: 'avoid', label: ' Avoid', emoji: '❌', count: palette.avoid?.length || 0 },
+        { key: 'neutrals', label: ' Neutrals', emoji: '⚪', count: palette.neutrals?.length || 0 }
     ];
 
     const renderColorCard = (color, index) => {
@@ -97,7 +90,7 @@ const ColorPalettePage = () => {
             >
                 <div className="color-preview" style={{ background: color.hex }}>
                     <div className="color-hex-overlay">
-                        {copiedColor === color.name ? 'âœ“ Copied!' : color.hex}
+                        {copiedColor === color.name ? '✅ Copied!' : color.hex}
                     </div>
                 </div>
                 <div className="color-details">
@@ -122,7 +115,7 @@ const ColorPalettePage = () => {
     return (
         <div className="color-page">
             <div className="color-header">
-                <h1>Your Color Palette</h1>
+                <h1>🎨 Your Color Palette</h1>
                 <p>Colors personalized to your skin tone, undertone, and features</p>
 
                 {profile?.physical?.skinTone && (
@@ -136,7 +129,7 @@ const ColorPalettePage = () => {
                         </div>
                         {profile.physical.skinTone.undertone && (
                             <div className="skin-chip">
-                                <span>ðŸŒ¡ï¸ {profile.physical.skinTone.undertone} Undertone</span>
+                                <span>{profile.physical.skinTone.undertone} Undertone</span>
                             </div>
                         )}
                     </div>
@@ -163,8 +156,8 @@ const ColorPalettePage = () => {
 
             {activeTab === 'best' && (
                 <div className="color-tip">
-                    <span className="tip-icon">ðŸ’¡</span>
-                    <p>Click any color to copy its hex code. Use these as your go-to wardrobe colors!</p>
+                    <span className="tip-icon"></span>
+                    <p>👆 Click any color to copy its hex code. Use these as your go-to wardrobe colors!</p>
                 </div>
             )}
         </div>

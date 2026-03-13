@@ -45,11 +45,7 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
         formData.append('occasion', occasion);
 
         try {
-<<<<<<< HEAD
             const response = await api.post('/analyze', formData, {
-=======
-            const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/analyze', formData, {
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
@@ -95,13 +91,13 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
                                 setFile(null);
                                 setPreview(null);
                             }}>
-                                Ã—
+                                X
                             </button>
                         </div>
                     ) : (
                         <div>
-                            <span className="upload-icon">ðŸ“¸</span>
-                            <h3>Upload your style</h3>
+                            <span className="upload-icon">📸</span>
+                            <h3>📤 Upload your style</h3>
                             <p>Tap to Browse or Drag Photo</p>
                         </div>
                     )}
@@ -111,9 +107,9 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
                     {loading ? (
                         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                             <div className="spinner" style={{ width: '20px', height: '20px', margin: 0, borderWidth: '2px' }}></div>
-                            Analyzing your look...
+                            🔍 Analyzing your look...
                         </span>
-                    ) : 'Start Stylist Analysis'}
+                    ) : '✨ Start Stylist Analysis'}
                 </button>
             </form>
         </div>

@@ -25,14 +25,7 @@ const ProfilePage = () => {
     const fetchProfile = async () => {
         try {
             setLoading(true);
-<<<<<<< HEAD
             const response = await api.get('/profile');
-=======
-            const token = localStorage.getItem('token');
-            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/profile', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
 
             if (response.data.success) {
                 setProfile(response.data.profile);
@@ -49,17 +42,9 @@ const ProfilePage = () => {
 
     const handleSavePreferences = async () => {
         try {
-<<<<<<< HEAD
             const response = await api.put(
                 '/profile/preferences',
                 { preferences }
-=======
-            const token = localStorage.getItem('token');
-            const response = await axios.put(
-                'https://ai-stylist-6l22.onrender.com/api/profile/preferences',
-                { preferences },
-                { headers: { Authorization: `Bearer ${token}` } }
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             );
 
             if (response.data.success) {
@@ -99,7 +84,7 @@ const ProfilePage = () => {
     if (!profile || !profile.physical) {
         return (
             <div className="profile-empty">
-                <div className="empty-icon">ðŸ“¸</div>
+                <div className="empty-icon">📸</div>
                 <h2>No Profile Yet</h2>
                 <p>Upload a photo to get your personalized style profile!</p>
                 <button
@@ -130,7 +115,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="profile-actions">
                     <button className="btn-action" onClick={() => navigate('/dashboard/upload')}>
-                        ðŸ“¸ Retake Analysis
+                        📸 Retake Analysis
                     </button>
                 </div>
             </div>
@@ -149,7 +134,7 @@ const ProfilePage = () => {
 
             {/* Style DNA */}
             <div className="section-title">
-                <span className="section-icon">ðŸ§¬</span>
+                <span className="section-icon">🧬</span>
                 <h2>Your Style DNA</h2>
             </div>
 
@@ -198,7 +183,7 @@ const ProfilePage = () => {
                     <div className="dna-card">
                         <h3>Body Type</h3>
                         <div className="body-type-display">
-                            <div className="body-icon">ðŸ’ª</div>
+                            <div className="body-icon">💪</div>
                             <div className="body-category">{profile.bodyType.category}</div>
                             {profile.bodyType.build && (
                                 <div className="body-detail">{profile.bodyType.build} Build</div>
@@ -243,7 +228,7 @@ const ProfilePage = () => {
             {profile.colorPalette && (
                 <>
                     <div className="section-title">
-                        <span className="section-icon">ðŸŽ¨</span>
+                        <span className="section-icon">🎨</span>
                         <h2>Complete Color Palette</h2>
                     </div>
 
@@ -299,7 +284,7 @@ const ProfilePage = () => {
             {profile.recommendations && (
                 <>
                     <div className="section-title">
-                        <span className="section-icon">ðŸ’¡</span>
+                        <span className="section-icon">💡</span>
                         <h2>Personalized Recommendations</h2>
                     </div>
 
@@ -349,7 +334,7 @@ const ProfilePage = () => {
 
             {/* Preferences (Editable) */}
             <div className="section-title">
-                <span className="section-icon">âš™ï¸</span>
+                <span className="section-icon">⚙️</span>
                 <h2>Style Preferences</h2>
                 {!editMode && (
                     <button className="btn-edit" onClick={() => setEditMode(true)}>
@@ -367,9 +352,9 @@ const ProfilePage = () => {
                                 value={preferences.priceRange || 'mid'}
                                 onChange={(e) => setPreferences({ ...preferences, priceRange: e.target.value })}
                             >
-                                <option value="budget">Budget-friendly (&lt; â‚¹1000)</option>
-                                <option value="mid">Mid-range (â‚¹1000-5000)</option>
-                                <option value="premium">Premium (â‚¹5000+)</option>
+                                <option value="budget">Budget-friendly (less than INR 1000)</option>
+                                <option value="mid">Mid-range (INR 1000-5000)</option>
+                                <option value="premium">Premium (INR 5000+)</option>
                             </select>
                         </div>
 
@@ -417,9 +402,9 @@ const ProfilePage = () => {
                         <div className="pref-item">
                             <label>Price Range:</label>
                             <span>
-                                {preferences.priceRange === 'budget' && 'Budget-friendly (< â‚¹1000)'}
-                                {preferences.priceRange === 'mid' && 'Mid-range (â‚¹1000-5000)'}
-                                {preferences.priceRange === 'premium' && 'Premium (â‚¹5000+)'}
+                                {preferences.priceRange === 'budget' && 'Budget-friendly (less than INR 1000)'}
+                                {preferences.priceRange === 'mid' && 'Mid-range (INR 1000-5000)'}
+                                {preferences.priceRange === 'premium' && 'Premium (INR 5000+)'}
                             </span>
                         </div>
                         {preferences.preferredBrands && (
@@ -449,23 +434,23 @@ const ProfilePage = () => {
 
             {/* Quick Actions */}
             <div className="section-title">
-                <span className="section-icon">âš¡</span>
+                <span className="section-icon">⚡</span>
                 <h2>Quick Actions</h2>
             </div>
 
             <div className="quick-actions-grid">
                 <div className="action-card" onClick={() => navigate('/dashboard/outfits')}>
-                    <span className="action-icon">ðŸŽ¨</span>
+                    <span className="action-icon">🎨</span>
                     <h4>Create Outfit</h4>
                     <p>Based on your profile</p>
                 </div>
                 <div className="action-card" onClick={() => navigate('/dashboard/chat')}>
-                    <span className="action-icon">ðŸ’¬</span>
+                    <span className="action-icon">💬</span>
                     <h4>Ask AI Stylist</h4>
                     <p>Get personalized advice</p>
                 </div>
                 <div className="action-card" onClick={() => navigate('/dashboard/upload')}>
-                    <span className="action-icon">ðŸ“¸</span>
+                    <span className="action-icon">📸</span>
                     <h4>Update Analysis</h4>
                     <p>Retake your photo</p>
                 </div>

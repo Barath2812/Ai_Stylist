@@ -34,17 +34,26 @@ router.get('/dashboard/stats', authenticate, async (req, res) => {
         }
 
         // Calculate statistics
-        const stats = {
-            totalAnalyses: user.analyses?.length || 0,
-            totalOutfits: user.outfits?.length || 0,
-            savedColors: user.savedColors?.length || 0,
-            faceShape: user.profile?.faceShape || 'Not analyzed yet'
-        };
+const stats = {
+    totalAnalyses: user.analyses?.length || 0,
+    totalOutfits: user.outfits?.length || 0,
+    challengesJoined: user.challenges?.length || 0,
+    savedColors: user.savedColors?.length || 0,
+    styleScore: user.profile?.styleScore || 0,
+    faceShape: user.profile?.physical?.faceShape?.type || 'Not analyzed yet'
+};
 
-        // Get recent analyses (last 5)
-        const recentAnalyses = user.analyses
-            ? user.analyses.slice(-5).reverse()
-            : [];
+// Get recent analyses (last 5) - mapped for frontend
+const recentAnalyses = user.analyses
+    ? user.analyses.slice(-5).reverse().map(analysis => ({
+        date: analysis.date,
+        occasion: analysis.occasion,
+        faceShape: analysis.faceShape,
+        skinTone: analysis.skinTone,
+        colors: analysis.colors || []
+      }))
+    : [];
+
 
         res.status(200).json({
             success: true,

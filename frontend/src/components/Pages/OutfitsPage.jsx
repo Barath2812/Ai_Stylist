@@ -40,14 +40,7 @@ const OutfitsPage = () => {
 
     const loadSavedOutfits = async () => {
         try {
-<<<<<<< HEAD
             const response = await api.get('/outfits');
-=======
-            const token = localStorage.getItem('token');
-            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             if (response.data.success) {
                 setSavedOutfits(response.data.outfits);
             }
@@ -76,12 +69,7 @@ const OutfitsPage = () => {
 
         try {
             setSearching(true);
-<<<<<<< HEAD
             const response = await api.get('/outfits/search', {
-=======
-            const token = localStorage.getItem('token');
-            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/outfits/search', {
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 params: {
                     query: searchQuery,
                     category: searchCategory,
@@ -160,16 +148,10 @@ const OutfitsPage = () => {
                 itemCount: itemCount
             };
 
-<<<<<<< HEAD
             const response = await api.post('/outfits/save', outfitData);
-=======
-            const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/outfits/save', outfitData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
 
             if (response.data.success) {
-                alert('Outfit saved successfully! ðŸŽ‰');
+alert('Outfit saved successfully! 🎉');
                 loadSavedOutfits();
                 setShowSaveModal(false);
                 clearOutfit();
@@ -189,14 +171,7 @@ const OutfitsPage = () => {
         if (!confirm('Are you sure you want to delete this outfit?')) return;
 
         try {
-<<<<<<< HEAD
             const response = await api.delete(`/outfits/${outfitId}`);
-=======
-            const token = localStorage.getItem('token');
-            const response = await axios.delete(`https://ai-stylist-6l22.onrender.com/api/outfits/${outfitId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
 
             if (response.data.success) {
                 alert('Outfit deleted!');
@@ -243,7 +218,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('top')}>
-                                    <span className="select-icon">ðŸ‘”</span>
+                                    <span className="select-icon">👔</span>
                                     <span>Select Shirt/Top</span>
                                 </button>
                             )}
@@ -262,7 +237,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('bottom')}>
-                                    <span className="select-icon">ðŸ‘–</span>
+                                    <span className="select-icon">👖</span>
                                     <span>Select Pants</span>
                                 </button>
                             )}
@@ -281,7 +256,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('shoes')}>
-                                    <span className="select-icon">ðŸ‘ž</span>
+                                    <span className="select-icon">👞</span>
                                     <span>Select Shoes</span>
                                 </button>
                             )}
@@ -300,7 +275,7 @@ const OutfitsPage = () => {
                                 </div>
                             ) : (
                                 <button className="select-btn" onClick={() => openSearchModal('accessories')}>
-                                    <span className="select-icon">âŒš</span>
+                                    <span className="select-icon">⌚</span>
                                     <span>Select Accessories</span>
                                 </button>
                             )}
@@ -311,7 +286,7 @@ const OutfitsPage = () => {
                     <div className="outfit-summary">
                         <div className="total-price">
                             <span>Total:</span>
-                            <span className="price-value">â‚¹{calculateTotal().toLocaleString()}</span>
+                            <span className="price-value">₹{calculateTotal().toLocaleString()}</span>
                         </div>
                         <div className="outfit-actions">
                             <button className="btn-clear" onClick={clearOutfit}>

@@ -60,12 +60,7 @@ const ChatPage = () => {
                 navigate('/login');
                 return;
             }
-<<<<<<< HEAD
             const response = await api.get('/chat/greeting', {
-=======
-            const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/chat/greeting', {
-                headers: { Authorization: `Bearer ${token}` },
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 timeout: REQUEST_TIMEOUT
             });
 
@@ -88,8 +83,8 @@ const ChatPage = () => {
             setMessages([{
                 role: 'assistant',
                 message: error.code === 'ERR_NETWORK' 
-                    ? "âš ï¸ Cannot connect to the server. Please check if the backend is running."
-                    : "ðŸ‘‹ Hi! I'm your AI Style Assistant! How can I help you today?",
+                    ? "Cannot connect to the server. Please check if the backend is running."
+                    : " Hi! I'm your AI Style Assistant! How can I help you today?",
                 timestamp: new Date().toISOString()
             }]);
         }
@@ -122,13 +117,8 @@ const ChatPage = () => {
             }
 
             // Send message with conversation history
-<<<<<<< HEAD
             const response = await api.post(
                 '/chat/message',
-=======
-            const response = await axios.post(
-                'https://ai-stylist-6l22.onrender.com/api/chat/message',
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 {
                     message: messageToSend,
                     conversationHistory: messages
@@ -168,12 +158,12 @@ const ChatPage = () => {
 
             let errorMsg = "Sorry, I couldn't process that. Please try again!";
             if (error.code === 'ERR_NETWORK') {
-                errorMsg = "âš ï¸ Cannot reach the server. Please check your connection.";
+                errorMsg = "Cannot reach the server. Please check your connection.";
                 setConnectionError(true);
             } else if (error.code === 'ECONNABORTED') {
-                errorMsg = "â±ï¸ Request timed out. The server might be busy â€” try again.";
+                errorMsg = " Request timed out. The server might be busy â€” try again.";
             } else if (error.response?.status >= 500) {
-                errorMsg = "ðŸ”§ Server error. Please try again in a moment.";
+                errorMsg = "Server error. Please try again in a moment.";
             }
 
             const errorMessage = {
@@ -209,10 +199,10 @@ const ChatPage = () => {
             {/* Chat Header */}
             <div className="chat-header">
                 <div className="chat-header-content">
-                    <div className="chat-avatar">ðŸ¤–</div>
+                    <div className="chat-avatar">🤖</div>
                     <div className="chat-info">
                         <h2>AI Style Assistant</h2>
-                        <p className="chat-status">Online â€¢  Ready to help</p>
+                        <p className="chat-status">Online Ready to help</p>
                     </div>
                 </div>
             </div>
@@ -309,11 +299,11 @@ const ChatPage = () => {
                         onClick={() => handleSendMessage()}
                         disabled={loading || !inputMessage.trim()}
                     >
-                        {loading ? '...' : 'â†’'}
+                        {loading ? '...' : ''}
                     </button>
                 </div>
                 <p className="chat-hint">
-                    ðŸ’¡ Try asking: "What colors suit me?" or "Help me with an outfit"
+                    💡 Try asking: "What colors suit me?" or "Help me with an outfit"
                 </p>
             </div>
         </div>

@@ -33,57 +33,12 @@ function fileToGenerativePart(path, mimeType) {
     };
 }
 
-function getColorRecommendations(skinTone, occasion) {
-    const recommendations = {
-        'Fair': {
-            'Formal': ['Navy Blue', 'Charcoal Grey', 'Black', 'Burgundy'],
-            'Semi-Formal': ['Olive Green', 'Beige', 'Light Grey', 'Dusty Pink'],
-            'Casual': ['Pastel Blue', 'Light Pink', 'White', 'Mint Green']
-        },
-        'Medium': {
-            'Formal': ['Navy Blue', 'Dark Grey', 'Deep Blue', 'Maroon'],
-            'Semi-Formal': ['Tan', 'Forest Green', 'Rust Orange', 'Cream'],
-            'Casual': ['Denim Blue', 'Olive', 'Burnt Orange', 'Teal']
-        },
-        'Dark': {
-            'Formal': ['White', 'Light Grey', 'Sky Blue', 'Cream'],
-            'Semi-Formal': ['Lavender', 'Peach', 'Light Yellow', 'Powder Blue'],
-            'Casual': ['Bright White', 'Yellow', 'Hot Pink', 'Electric Blue']
-        }
-    };
-
-    return recommendations[skinTone]?.[occasion] || ['Blue', 'Grey', 'White'];
-}
+// Removed static mock color recommendations - using Gemini AI for dynamic colors
 
 // ============================================
 // HAIRSTYLE & BEARD RECOMMENDATIONS
 // ============================================
-function getStyleRecommendations(faceShape) {
-    const styles = {
-        "Oval": {
-            "hairstyle": "Pompadour, Side Part, or Slicked Back",
-            "beardStyle": "Clean shaven or Light stubble"
-        },
-        "Round": {
-            "hairstyle": "High Volume Undercut or Faux Hawk (adds height)",
-            "beardStyle": "Goatee or Van Dyke (adds length to face)"
-        },
-        "Square": {
-            "hairstyle": "Buzz Cut, Crew Cut, or Short Textured",
-            "beardStyle": "Light Beard or Designer Stubble (softens angles)"
-        },
-        "Heart": {
-            "hairstyle": "Long Fringe, Side Swept, or Textured Quiff",
-            "beardStyle": "Full Beard (adds bulk to narrow jaw)"
-        },
-        "Oblong": {
-            "hairstyle": "Side Swept with Volume or Fringe (reduces length)",
-            "beardStyle": "Mutton Chops or Short Beard"
-        }
-    };
-
-    return styles[faceShape] || styles["Oval"];
-}
+// Removed static mock style recommendations - using Gemini AI for dynamic recommendations
 
 // ============================================
 // PRODUCT SEARCH - WEB SCRAPING WITH PUPPETEER
@@ -343,16 +298,70 @@ IMPORTANT: Return ONLY the JSON, no markdown, no explanation.
 
             await newResult.save();
 
+// ============================================
+            // SAVE FULL PROFILE TO USER
             // ============================================
-            // RETURN COMPLETE ANALYSIS (NO PRODUCTS!)
-            // ============================================
-            res.json({
-                success: true,
-                userImagePath: absoluteImagePath,
-                imageQuality: analysisResult.imageQuality,
-                profile: completeProfile,
-                message: "Complete style analysis ready! Save your profile to personalize recommendations."
-            });
+            try {
+                const userId = req.userId || 'temp-user'; // Add auth middleware later
+                const User = require('../models/User');
+                let user = await User.findOne({ email: userId });
+                
+                if (!user) {
+                    user = new User({
+                        name: 'Guest',
+                        email: userId,
+                        password: 'guest123',
+                        profile: completeProfile,
+                        analyses: [{
+                            date: new Date(),
+                            imagePath: req.file.path,
+                            occasion: occasion,
+                            faceShape: completeProfile.physical.faceShape.type,
+                            skinTone: completeProfile.physical.skinTone.category,
+                            colors: completeProfile.colorPalette.best.map(c => c.hex),
+                            products: null
+                        }]
+                    });
+                } else {
+                    // Update existing user
+                    user.profile = completeProfile;
+                    user.analyses.unshift({
+                        date: new Date(),
+                        imagePath: req.file.path,
+                        occasion: occasion,
+                        faceShape: completeProfile.physical.faceShape.type,
+                        skinTone: completeProfile.physical.skinTone.category,
+                        colors: completeProfile.colorPalette.best.map(c => c.hex),
+                        products: null
+                    });
+                    // Keep only last 20 analyses
+                    user.analyses = user.analyses.slice(0, 20);
+                }
+                
+                await user.save();
+                console.log('✅ Profile saved to user:', user.email);
+                
+                res.json({
+                    success: true,
+                    userImagePath: absoluteImagePath,
+                    imageQuality: analysisResult.imageQuality,
+                    profile: completeProfile,
+                    dashboardStats: {
+                        totalAnalyses: user.analyses.length,
+                        profileComplete: 85
+                    }
+                });
+            } catch (userError) {
+                console.error('User save error:', userError);
+                // Fallback - return analysis without user save
+                res.json({
+                    success: true,
+                    userImagePath: absoluteImagePath,
+                    imageQuality: analysisResult.imageQuality,
+                    profile: completeProfile,
+                    warning: 'Analysis complete but user profile save failed'
+                });
+            }
 
         } catch (err) {
             console.error('❌ Error:', err);

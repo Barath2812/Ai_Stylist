@@ -206,40 +206,6 @@ async function searchProducts(styleCategory, colors, occasion, options = {}) {
     return allProducts.slice(0, limit);
 }
 
-function getMockProducts(styleCategory, colors) {
-    return [
-        {
-            id: 'mock-1',
-            name: `${colors[0]} ${styleCategory} Shirt`,
-            brand: 'Generic Brand',
-            price: '₹1,299',
-            image: 'https://via.placeholder.com/300x400?text=Product+1',
-            buyLink: 'https://www.myntra.com',
-            category: 'upper_body',
-            source: 'Mock'
-        },
-        {
-            id: 'mock-2',
-            name: `${colors[1]} Premium Blazer`,
-            brand: 'Generic Brand',
-            price: '₹3,499',
-            image: 'https://via.placeholder.com/300x400?text=Product+2',
-            buyLink: 'https://www.myntra.com',
-            category: 'upper_body',
-            source: 'Mock'
-        },
-        {
-            id: 'mock-3',
-            name: `${colors[0]} Complete Outfit`,
-            brand: 'Generic Brand',
-            price: '₹5,999',
-            image: 'https://via.placeholder.com/300x400?text=Product+3',
-            buyLink: 'https://www.myntra.com',
-            category: 'full_body',
-            source: 'Mock'
-        }
-    ];
-}
 
 function detectCategory(productName) {
     const nameLower = productName.toLowerCase();
@@ -429,6 +395,6 @@ module.exports = {
     searchProducts,
     scrapeMyntraWithBrowser,
     scrapeAjioWithBrowser,
-    searchForOutfitBuilder,  // NEW: Simple search for outfit builder
-    detectCategory            // NEW: Category detection helper
+    searchForOutfitBuilder,  
+    detectCategory            
 };

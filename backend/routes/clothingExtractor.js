@@ -42,7 +42,7 @@ router.post('/extract', async (req, res) => {
             });
         }
 
-        console.log(`ðŸŽ¨ Extracting clothing from: ${imageUrl}`);
+        console.log(` Extracting clothing from: ${imageUrl}`);
 
         // Create temp directories
         const tempDir = path.join(__dirname, '../temp');
@@ -61,11 +61,11 @@ router.post('/extract', async (req, res) => {
         const outputPath = path.join(outputDir, `extracted_${timestamp}.png`);
 
         // Download image
-        console.log('ðŸ“¥ Downloading image...');
+        console.log(' Downloading image...');
         await downloadImage(imageUrl, inputPath);
 
         // Run Python extraction script
-        console.log('ðŸ”§ Running clothing extraction...');
+        console.log('Running clothing extraction...');
         const pythonScript = path.join(__dirname, '../python/clothing_extractor.py');
         const command = `python "${pythonScript}" "${inputPath}" "${outputPath}"`;
 
@@ -88,7 +88,7 @@ router.post('/extract', async (req, res) => {
         // Generate URL for extracted image
         const extractedImageUrl = `/uploads/extracted/${path.basename(outputPath)}`;
 
-        console.log('âœ… Clothing extracted successfully!');
+        console.log(' Clothing extracted successfully!');
 
         res.json({
             success: true,
@@ -99,7 +99,7 @@ router.post('/extract', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('âŒ Clothing extraction error:', error);
+        console.error('Clothing extraction error:', error);
         res.status(500).json({
             success: false,
             error: 'Failed to extract clothing from image',
@@ -122,7 +122,7 @@ router.post('/extract-batch', async (req, res) => {
             });
         }
 
-        console.log(`ðŸŽ¨ Batch extracting ${images.length} images...`);
+        console.log(`\ Batch extracting ${images.length} images...`);
 
         const results = [];
 
@@ -176,7 +176,7 @@ router.post('/extract-batch', async (req, res) => {
             }
         }
 
-        console.log(`âœ… Batch extraction complete: ${results.filter(r => r.success).length}/${images.length} successful`);
+        console.log(` Batch extraction complete: ${results.filter(r => r.success).length}/${images.length} successful`);
 
         res.json({
             success: true,
@@ -184,7 +184,7 @@ router.post('/extract-batch', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('âŒ Batch extraction error:', error);
+        console.error(' Batch extraction error:', error);
         res.status(500).json({
             success: false,
             error: 'Failed to process batch extraction'

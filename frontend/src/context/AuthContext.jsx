@@ -27,15 +27,7 @@ export const AuthProvider = ({ children }) => {
             }
 
             try {
-<<<<<<< HEAD
                 const response = await api.get('/auth/verify');
-=======
-                const response = await axios.get('https://ai-stylist-6l22.onrender.com/api/auth/verify', {
-                    headers: {
-                        Authorization: `Bearer ${storedToken}`
-                    }
-                });
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
 
                 if (response.data.success) {
                     setUser(response.data.user);
@@ -54,11 +46,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-<<<<<<< HEAD
         const response = await api.post('/auth/login', {
-=======
-        const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/auth/login', {
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             email,
             password
         });
@@ -75,11 +63,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signup = async (name, email, password) => {
-<<<<<<< HEAD
         const response = await api.post('/auth/signup', {
-=======
-        const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/auth/signup', {
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
             name,
             email,
             password

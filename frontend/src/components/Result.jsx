@@ -16,11 +16,7 @@ const Result = ({ result, reset }) => {
         const fetchProducts = async () => {
             try {
                 setProductsLoading(true);
-<<<<<<< HEAD
                 const response = await api.post('/products/recommendations', {
-=======
-                const response = await axios.post('https://ai-stylist-6l22.onrender.com/api/products/recommendations', {
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                     profile: profile
                 });
 
@@ -42,15 +38,8 @@ const Result = ({ result, reset }) => {
     const handleSaveProfile = async () => {
         try {
             setSaving(true);
-<<<<<<< HEAD
             const response = await api.post(
                 '/profile/save',
-=======
-            const token = localStorage.getItem('token');
-
-            const response = await axios.post(
-                'https://ai-stylist-6l22.onrender.com/api/profile/save',
->>>>>>> 3239da67e6695471f4e2792b8c7beefc71a305cd
                 {
                     profile: profile,
                     photoUrl: result.userImagePath,
@@ -77,14 +66,14 @@ const Result = ({ result, reset }) => {
         <div className="result-page-v2">
             {/* Header */}
             <div className="result-header">
-                <h1>Your Complete Style Profile</h1>
+                <h1>✨ Your Complete Style Profile</h1>
                 <p>AI-powered personalized fashion analysis</p>
             </div>
 
             {/* Image Quality Badge */}
             {imageQuality && (
                 <div className={`quality-badge quality-${imageQuality.lighting}`}>
-                    <span className="badge-icon">ðŸ“¸</span>
+📸
                     Image Quality: {imageQuality.lighting} lighting, {imageQuality.clarity} clarity
                 </div>
             )}
@@ -95,7 +84,7 @@ const Result = ({ result, reset }) => {
                 {/* Physical Attributes */}
                 <div className="profile-card">
                     <div className="card-header">
-                        <span className="card-icon">ðŸ‘¤</span>
+👤
                         <h2>Physical Analysis</h2>
                     </div>
 
@@ -161,7 +150,7 @@ const Result = ({ result, reset }) => {
                 {/* Body Type */}
                 <div className="profile-card">
                     <div className="card-header">
-                        <span className="card-icon">ðŸ’ª</span>
+💪
                         <h2>Body Type</h2>
                     </div>
 
@@ -182,7 +171,7 @@ const Result = ({ result, reset }) => {
                 {/* Style Personality */}
                 <div className="profile-card">
                     <div className="card-header">
-                        <span className="card-icon">âœ¨</span>
+✨
                         <h2>Style Personality</h2>
                     </div>
 
@@ -218,14 +207,14 @@ const Result = ({ result, reset }) => {
                 {/* Color Palette - Full Width */}
                 <div className="profile-card full-width">
                     <div className="card-header">
-                        <span className="card-icon">ðŸŽ¨</span>
+🎨
                         <h2>Your Complete Color Palette</h2>
                     </div>
 
                     <div className="color-sections">
                         {/* Best Colors */}
                         <div className="color-section">
-                            <h3>Best Colors</h3>
+                            <h3>⭐ Best Colors</h3>
                             <div className="color-grid">
                                 {profile.colorPalette.best.map((color, idx) => (
                                     <div key={idx} className="color-card">
@@ -243,7 +232,7 @@ const Result = ({ result, reset }) => {
                         {/* Accent Colors */}
                         {profile.colorPalette.accent && profile.colorPalette.accent.length > 0 && (
                             <div className="color-section">
-                                <h3>Accent Colors</h3>
+                                <h3>✨ Accent Colors</h3>
                                 <div className="color-grid">
                                     {profile.colorPalette.accent.map((color, idx) => (
                                         <div key={idx} className="color-card">
@@ -262,7 +251,7 @@ const Result = ({ result, reset }) => {
                         {/* Colors to Avoid */}
                         {profile.colorPalette.avoid && profile.colorPalette.avoid.length > 0 && (
                             <div className="color-section avoid-section">
-                                <h3>Colors to Avoid</h3>
+                                <h3>❌ Colors to Avoid</h3>
                                 <div className="color-grid">
                                     {profile.colorPalette.avoid.map((color, idx) => (
                                         <div key={idx} className="color-card avoid-card">
@@ -290,7 +279,7 @@ const Result = ({ result, reset }) => {
                 {/* Recommendations */}
                 <div className="profile-card full-width">
                     <div className="card-header">
-                        <span className="card-icon">ðŸ’¡</span>
+💡
                         <h2>Personalized Recommendations</h2>
                     </div>
 
@@ -347,7 +336,7 @@ const Result = ({ result, reset }) => {
                 {/* AI Curated Products Section */}
                 <div className="profile-card full-width">
                     <div className="card-header">
-                        <span className="card-icon">ðŸ›ï¸</span>
+🛍️
                         <h2>Curated For You</h2>
                     </div>
 

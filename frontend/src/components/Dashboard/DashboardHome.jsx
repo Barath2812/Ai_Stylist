@@ -30,19 +30,21 @@ const DashboardHome = () => {
         }
     };
 
-    const fetchStats = async () => {
-        try {
-            const response = await api.get('/outfits');
-            if (response.data.success) {
-                setStats(prev => ({
-                    ...prev,
-                    outfitsCreated: response.data.outfits.length
-                }));
-            }
-        } catch (error) {
-            console.error('Error fetching stats:', error);
+const fetchStats = async () => {
+    try {
+        const response = await api.get('/dashboard/stats');
+        if (response.data.success) {
+            setStats({
+                outfitsCreated: response.data.stats.totalOutfits || 0,
+                challengesJoined: response.data.stats.challengesJoined || 0,
+                styleScore: response.data.stats.styleScore || 0
+            });
         }
-    };
+    } catch (error) {
+        console.error('Error fetching stats:', error);
+    }
+};
+
 
     const calculateCompletion = () => {
         if (!profile) return 0;
@@ -59,47 +61,47 @@ const DashboardHome = () => {
     return (
         <div className="dashboard-home">
             <div className="welcome-section">
-                <h1>Welcome back, {user?.name}! ðŸ‘‹</h1>
+                <h1>👋 Welcome back, {user?.name}!</h1>
                 <p>Your personal AI stylist is ready to help you look your best</p>
             </div>
 
             {/* Stats Cards */}
             <div className="stats-grid">
                 <div className="stat-card">
-                    <div className="stat-icon">ðŸŽ¨</div>
+                    <div className="stat-icon">🎨</div>
                     <div className="stat-content">
                         <h3>{stats.outfitsCreated}</h3>
-                        <p>Outfits Created</p>
+                        <p>👗 Outfits Created</p>
                     </div>
                 </div>
 
                 <div className="stat-card">
-                    <div className="stat-icon">ðŸ†</div>
+                    <div className="stat-icon">🏆</div>
                     <div className="stat-content">
                         <h3>{stats.challengesJoined}</h3>
-                        <p>Challenges Joined</p>
+                        <p>🏆 Challenges Joined</p>
                     </div>
                 </div>
 
                 <div className="stat-card">
-                    <div className="stat-icon">â­</div>
+                    <div className="stat-icon">⭐</div>
                     <div className="stat-content">
                         <h3>{calculateCompletion()}%</h3>
-                        <p>Profile Complete</p>
+                        <p>✅ Profile Complete</p>
                     </div>
                 </div>
             </div>
 
             {/* Quick Actions */}
             <div className="quick-actions-section">
-                <h2>Quick Actions</h2>
+                <h2>⚡ Quick Actions</h2>
                 <div className="actions-grid">
                     <div
                         className="action-card"
                         onClick={() => navigate('/dashboard/upload')}
                     >
-                        <span className="action-icon">ðŸ“¸</span>
-                        <h3>Analyze Photo</h3>
+                        <span className="action-icon">📸</span>
+                        <h3>📸 Analyze Photo</h3>
                         <p>Get your personalized style profile</p>
                     </div>
 
@@ -107,8 +109,8 @@ const DashboardHome = () => {
                         className="action-card"
                         onClick={() => navigate('/dashboard/outfits')}
                     >
-                        <span className="action-icon">ðŸ‘”</span>
-                        <h3>Build Outfit</h3>
+                        <span className="action-icon">👔</span>
+                        <h3>👗 Build Outfit</h3>
                         <p>Mix and match your perfect look</p>
                     </div>
 
@@ -116,8 +118,8 @@ const DashboardHome = () => {
                         className="action-card"
                         onClick={() => navigate('/dashboard/chat')}
                     >
-                        <span className="action-icon">ðŸ’¬</span>
-                        <h3>Ask AI Stylist</h3>
+                        <span className="action-icon">💬</span>
+                        <h3>💬 Ask AI Stylist</h3>
                         <p>Get personalized fashion advice</p>
                     </div>
 
@@ -125,8 +127,8 @@ const DashboardHome = () => {
                         className="action-card"
                         onClick={() => navigate('/dashboard/profile')}
                     >
-                        <span className="action-icon">ðŸ‘¤</span>
-                        <h3>View Profile</h3>
+                        <span className="action-icon">👤</span>
+                        <h3>👤 View Profile</h3>
                         <p>See your complete style analysis</p>
                     </div>
                 </div>
@@ -135,7 +137,7 @@ const DashboardHome = () => {
             {/* Profile Status */}
             {profile && profile.physical ? (
                 <div className="profile-summary">
-                    <h2>Your Style Profile</h2>
+                    <h2>✨ Your Style Profile</h2>
                     <div className="profile-highlights">
                         <div className="highlight-item">
                             <label>Face Shape:</label>
@@ -158,18 +160,18 @@ const DashboardHome = () => {
                         className="btn-view-full"
                         onClick={() => navigate('/dashboard/profile')}
                     >
-                        View Full Profile â†’
+                        👁️ View Full Profile
                     </button>
                 </div>
             ) : (
                 <div className="profile-prompt">
-                    <h2>Complete Your Profile</h2>
+                    <h2>✅ Complete Your Profile</h2>
                     <p>Upload a photo to get personalized style recommendations</p>
                     <button
                         className="btn-upload"
                         onClick={() => navigate('/dashboard/upload')}
                     >
-                        Upload Photo Now
+                        📤 Upload Photo Now
                     </button>
                 </div>
             )}
