@@ -5,6 +5,7 @@ import mediapipe as mp
 import numpy as np
 import json
 
+print("Mediapipe path:", mp.__file__)
 # Initialize MediaPipe Face Mesh
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(
