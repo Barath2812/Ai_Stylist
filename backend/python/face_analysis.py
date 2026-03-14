@@ -7,7 +7,12 @@ import json
 
 print("Mediapipe path:", mp.__file__)
 # Initialize MediaPipe Face Mesh
-mp_face_mesh = mp.solutions.face_mesh
+try:
+    import mediapipe as mp
+    mp_face_mesh = mp.solutions.face_mesh
+except AttributeError:
+    from mediapipe.python.solutions import face_mesh as mp_face_mesh
+
 face_mesh = mp_face_mesh.FaceMesh(
     static_image_mode=True,
     max_num_faces=2,
