@@ -25,5 +25,9 @@
    - Update TODOs
    - attempt_completion
 
-**Backend fixes ✅ | Next: Python resize & Frontend compression**
+### 6. **404 Fixes** [✅ COMPLETE]
+   - favicon.svg + link in index.html
+   - /upload static route in server.js (alias for /uploads)
+
+**Backend fixes ✅ | 404s fixed ✅ | Next: Python resize & Frontend compression**
 

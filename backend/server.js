@@ -20,6 +20,7 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/upload', express.static(path.join(__dirname, 'uploads')));
 
 // Database Connection
 mongoose.connect('mongodb+srv://barathrajdev:f1r2e3e4@cluster0.tsojopp.mongodb.net/ai-stylist', {
