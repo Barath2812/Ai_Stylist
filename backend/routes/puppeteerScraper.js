@@ -14,6 +14,7 @@ async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
         
         browser = await puppeteer.launch({
             headless: true,
+            executablePath: '/usr/bin/chromium',  
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
