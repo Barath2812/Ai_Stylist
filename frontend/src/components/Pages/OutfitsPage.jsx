@@ -209,7 +209,7 @@ alert('Outfit saved successfully! 🎉');
                         <div className={`outfit-slot-v2 ${outfitItems.top ? 'filled' : 'empty'}`}>
                             {outfitItems.top ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('top')}>Ã—</button>
+                                    <button className="remove-btn" onClick={() => removeItem('top')}>❌</button>
                                     <img src={outfitItems.top.image} alt={outfitItems.top.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.top.name}</p>
@@ -228,7 +228,7 @@ alert('Outfit saved successfully! 🎉');
                         <div className={`outfit-slot-v2 ${outfitItems.bottom ? 'filled' : 'empty'}`}>
                             {outfitItems.bottom ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('bottom')}>Ã—</button>
+                                    <button className="remove-btn" onClick={() => removeItem('bottom')}>❌</button>
                                     <img src={outfitItems.bottom.image} alt={outfitItems.bottom.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.bottom.name}</p>
@@ -247,7 +247,7 @@ alert('Outfit saved successfully! 🎉');
                         <div className={`outfit-slot-v2 ${outfitItems.shoes ? 'filled' : 'empty'}`}>
                             {outfitItems.shoes ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('shoes')}>Ã—</button>
+                                    <button className="remove-btn" onClick={() => removeItem('shoes')}>❌</button>
                                     <img src={outfitItems.shoes.image} alt={outfitItems.shoes.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.shoes.name}</p>
@@ -266,7 +266,7 @@ alert('Outfit saved successfully! 🎉');
                         <div className={`outfit-slot-v2 ${outfitItems.accessories ? 'filled' : 'empty'}`}>
                             {outfitItems.accessories ? (
                                 <div className="slot-content">
-                                    <button className="remove-btn" onClick={() => removeItem('accessories')}>Ã—</button>
+                                    <button className="remove-btn" onClick={() => removeItem('accessories')}>❌</button>
                                     <img src={outfitItems.accessories.image} alt={outfitItems.accessories.name} />
                                     <div className="item-details">
                                         <p className="item-name">{outfitItems.accessories.name}</p>
@@ -336,7 +336,7 @@ alert('Outfit saved successfully! 🎉');
                     <div className="modal-content-search" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>Search {categoryLabels[searchCategory]}</h2>
-                            <button className="close-modal-btn" onClick={closeSearchModal}>Ã—</button>
+                            <button className="close-modal-btn" onClick={closeSearchModal}>❌</button>
                         </div>
 
                         <form className="modal-search-form" onSubmit={searchProducts}>

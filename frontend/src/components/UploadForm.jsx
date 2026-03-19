@@ -6,7 +6,7 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
     const [occasion, setOccasion] = useState('Casual');
     const [preview, setPreview] = useState(null);
 
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
     const handleFileChange = (e) => {
@@ -15,14 +15,12 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
 
         if (!selectedFile) return;
 
-        // File type check
         if (!ALLOWED_TYPES.includes(selectedFile.type)) {
             setError('Please upload a JPEG, PNG, or WebP image.');
             e.target.value = '';
             return;
         }
 
-        // File size check
         if (selectedFile.size > MAX_FILE_SIZE) {
             const sizeMB = (selectedFile.size / (1024 * 1024)).toFixed(1);
             setError(`Image is too large (${sizeMB}MB). Maximum size is 10MB.`);
@@ -44,12 +42,15 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
         formData.append('image', file);
         formData.append('occasion', occasion);
 
+        const token = localStorage.getItem('token');
+
         try {
             const response = await api.post('/analyze', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': token ? `Bearer ${token}` : ''
                 },
-                timeout: 60000 // 60s timeout for analysis
+                timeout: 60000 
             });
             setResult(response.data);
         } catch (err) {
@@ -87,7 +88,7 @@ const UploadForm = ({ setResult, setLoading, setError, loading }) => {
                         <div className="image-preview">
                             <img src={preview} alt="Preview" />
                             <button type="button" className="remove-btn" onClick={(e) => {
-                                e.preventDefault(); // Prevent wrapper click
+                                e.preventDefault(); 
                                 setFile(null);
                                 setPreview(null);
                             }}>

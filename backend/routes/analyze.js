@@ -7,12 +7,26 @@ const Result = require('../models/Result');
 const fs = require('fs');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-// Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// Configure Multer Storage with 15MB limit
+// Middleware to silently check if a user is logged in
+const checkUser = (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (token) {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            req.userId = decoded.userId; // This is the MongoDB _id
+        }
+    } catch (error) {
+        console.log('No token or invalid token, proceeding as guest');
+    }
+    next();
+};
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -25,7 +39,7 @@ const storage = multer.diskStorage({
 const upload = multer({ 
     storage: storage,
     limits: {
-        fileSize: 15 * 1024 * 1024 // 15MB max
+        fileSize: 15 * 1024 * 1024
     }
 });
 
@@ -40,19 +54,17 @@ function fileToGenerativePart(path, mimeType) {
 
 const { searchProducts } = require('./puppeteerScraper');
 
-// Timeout wrapper for promises
 const promiseTimeout = (promise, ms) => Promise.race([
     promise,
     new Promise((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms))
 ]);
 
-// MAIN ANALYZE ROUTE
-router.post('/analyze', upload.single('image'), async (req, res) => {
+// Added checkUser middleware here
+router.post('/analyze', checkUser, upload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No image uploaded' });
     }
 
-    // Size check (redundant but explicit)
     if (req.file.size > 15 * 1024 * 1024) {
         fs.unlinkSync(req.file.path);
         return res.status(413).json({ error: 'File too large. Max 15MB. Please use smaller image.' });
@@ -67,7 +79,6 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
     console.log(`Analyzing image (${(req.file.size/1024/1024).toFixed(1)}MB): ${absoluteImagePath}`);
 
     try {
-        // Python spawn with 90s timeout wrapper
         const runPythonWithTimeout = () => new Promise((resolve, reject) => {
             const pythonProcess = spawn('python', [
                 scriptPath, 
@@ -96,7 +107,6 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
                     return;
                 }
 
-                // Parse JSON
                 const startIdx = dataString.indexOf('{');
                 const endIdx = dataString.lastIndexOf('}') + 1;
                 if (startIdx === -1 || endIdx <= startIdx) {
@@ -124,7 +134,6 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
             return res.status(400).json({ error: 'Face not detected clearly. Try better lighting/angle.' });
         }
 
-        // Gemini style analysis with 45s timeout
         let styleProfile;
         if (process.env.GEMINI_API_KEY) {
             console.log("🤖 Calling Gemini...");
@@ -132,25 +141,28 @@ router.post('/analyze', upload.single('image'), async (req, res) => {
             const imagePart = fileToGenerativePart(imagePath, req.file.mimetype || 'image/jpeg');
 
             const prompt = `
-You are an expert fashion stylist. Analyze photo with these measurements:
+You are an expert fashion stylist. Analyze the person in the provided photo along with these measurements:
 
 Face Shape: ${analysisResult.faceShapeData?.type || analysisResult.faceShape} (${Math.round((analysisResult.faceShapeData?.confidence || 0.8)*100)}%)
 Skin Tone: ${analysisResult.skinToneData?.category || 'Medium'} (${analysisResult.skinToneData?.undertone || 'Neutral'})
 Symmetry: ${Math.round((analysisResult.facialSymmetry || 0.85)*100)}%
 Occasion: ${occasion}
 
-Provide ONLY JSON:
+IMPORTANT: Observe the person's apparent gender, style, and vibe from the photo. Provide clothing recommendations that exactly match their specific gender presentation.
+
+Provide ONLY valid JSON in this exact structure:
 {
-  "bodyType": {"category": "Mesomorph", "build": "Athletic", "shoulders": "Broad", "recommendation": "Tailored fits"},
-  "physical": {"hair": {"color": "Brown", "texture": "Wavy", "style": "Medium"}, "eyes": {"color": "Brown"}, "beardStyle": "Stubble"},
-  "stylePersonality": {"primary": {"type": "Casual", "percentage": 50}, "secondary": {"type": "Smart Casual", "percentage": 30}},
+  "inferredGender": "Male/Female/Other",
+  "bodyType": {"category": "e.g., Ectomorph/Hourglass", "build": "e.g., Slim/Curvy", "recommendation": "e.g., Tailored fits/Waist emphasis"},
+  "physical": {"hair": {"color": "Brown", "texture": "Wavy", "style": "Long"}, "eyes": {"color": "Brown"}},
+  "stylePersonality": {"primary": {"type": "Casual", "percentage": 50}, "secondary": {"type": "Chic", "percentage": 30}},
   "colorPalette": {
     "best": [{"name": "Navy", "hex": "#001F3F", "reason": "Perfect match"}],
     "accent": [{"name": "Gold", "hex": "#FFD700"}],
     "avoid": [{"name": "Neon", "hex": "#FF00FF"}],
     "neutrals": ["Navy", "Gray"]
   },
-  "recommendations": {"necklines": ["V-neck"], "fits": ["Slim"]}
+  "recommendations": {"necklines": ["V-neck", "Scoop"], "fits": ["A-line", "Slim"], "outfitTypes": ["Dresses", "Blouses", "Jeans", "Suits"]}
 }`;
 
             const result = await promiseTimeout(model.generateContent([prompt, imagePart]), 45000);
@@ -163,6 +175,7 @@ Provide ONLY JSON:
         }
 
         const completeProfile = {
+            inferredGender: styleProfile.inferredGender,
             physical: {
                 faceShape: analysisResult.faceShapeData || analysisResult.faceShape,
                 skinTone: analysisResult.skinToneData || analysisResult.skinTone,
@@ -177,32 +190,40 @@ Provide ONLY JSON:
             analyzedAt: new Date()
         };
 
-        // Save result and user profile (existing logic)
         const newResult = new Result({
             imagePath: req.file.path,
             occasion,
+            gender: styleProfile.inferredGender,
             faceShape: analysisResult.faceShape,
             skinTone: analysisResult.skinTone,
             outfit: styleProfile.stylePersonality?.primary?.type || 'Casual',
             hairstyle: styleProfile.physical?.hair?.style || 'Short',
-            beardStyle: styleProfile.physical?.beardStyle || 'Clean Shaven'
+            beardStyle: styleProfile.physical?.beardStyle || 'None'
         });
         await newResult.save();
 
-        // User save logic (existing)
         try {
-            const userId = req.userId || 'temp-user';
             const User = require('../models/User');
-            let user = await User.findOne({ email: userId });
+            let user;
+            
+            // Fixed the search logic: Use findById if logged in, otherwise find the guest account
+            if (req.userId) {
+                user = await User.findById(req.userId);
+            } else {
+                user = await User.findOne({ email: 'guest@aistylist.com' });
+            }
+
             if (!user) {
                 user = new User({
                     name: 'Guest',
-                    email: userId,
+                    email: req.userId ? 'error@aistylist.com' : 'guest@aistylist.com',
+                    password: 'GuestPassword123!', // Fixes the Mongoose Validation Crash
                     profile: completeProfile,
                     analyses: [{
                         date: new Date(),
                         imagePath: req.file.path,
                         occasion,
+                        gender: styleProfile.inferredGender,
                         faceShape: completeProfile.physical.faceShape.type || completeProfile.physical.faceShape,
                         skinTone: completeProfile.physical.skinTone.category || completeProfile.physical.skinTone,
                         colors: completeProfile.colorPalette.best.map(c => c.hex)
@@ -214,6 +235,7 @@ Provide ONLY JSON:
                     date: new Date(),
                     imagePath: req.file.path,
                     occasion,
+                    gender: styleProfile.inferredGender,
                     faceShape: completeProfile.physical.faceShape.type || completeProfile.physical.faceShape,
                     skinTone: completeProfile.physical.skinTone.category || completeProfile.physical.skinTone,
                     colors: completeProfile.colorPalette.best.map(c => c.hex)
@@ -247,11 +269,9 @@ Provide ONLY JSON:
 
     } catch (err) {
         console.error('❌ Analysis Error:', err.message);
-        // Cleanup on error
         if (req.file && fs.existsSync(req.file.path)) {
             fs.unlinkSync(req.file.path);
         }
-        // Specific error types
         if (err.message.includes('too large') || err.message.includes('fileSize')) {
             res.status(413).json({ error: 'Image too large (max 15MB). Please compress or try smaller image.' });
         } else if (err.message.includes('Timeout')) {

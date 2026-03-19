@@ -2,27 +2,37 @@ const express = require('express');
 const router = express.Router();
 const { scrapeMyntraWithBrowser, scrapeAjioWithBrowser } = require('./puppeteerScraper');
 
-// Helper to determine product searches based on profile
 function generateSearchQueries(profile) {
     const styleType = profile?.stylePersonality?.primary?.type?.toLowerCase() || 'casual';
     const topColor = profile?.colorPalette?.best?.[0]?.name?.toLowerCase() || 'black';
     const accentColor = profile?.colorPalette?.accent?.[0]?.name?.toLowerCase() || 'silver';
+    const gender = profile?.inferredGender?.toLowerCase() || 'male';
+    const isFemale = gender === 'female';
 
     let categoryContext = 'casual';
     if (styleType.includes('formal') || styleType.includes('business')) categoryContext = 'formal';
     if (styleType.includes('street')) categoryContext = 'streetwear';
     if (styleType.includes('party')) categoryContext = 'party';
 
-    return {
-        shirt: `${topColor} ${categoryContext} shirt men`,
-        pant: `black ${categoryContext} trousers men`,  // Defaulting to black/dark for pants as a safe base
-        shoes: `${categoryContext} shoes men`,
-        watch: `${accentColor} analog watch men`,
-        accessories: `${categoryContext} belt men`
-    };
+    if (isFemale) {
+        return {
+            shirt: `${topColor} ${categoryContext} top women`,
+            pant: `black ${categoryContext} trousers women`,
+            shoes: `${categoryContext} shoes women`,
+            watch: `${accentColor} analog watch women`,
+            accessories: `${categoryContext} handbag women`
+        };
+    } else {
+        return {
+            shirt: `${topColor} ${categoryContext} shirt men`,
+            pant: `black ${categoryContext} trousers men`,
+            shoes: `${categoryContext} shoes men`,
+            watch: `${accentColor} analog watch men`,
+            accessories: `${categoryContext} belt men`
+        };
+    }
 }
 
-// Fallback mock function per category
 function getMockCategory(category, query) {
     const images = {
         shirt: 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=500&q=80',
@@ -64,15 +74,10 @@ router.post('/recommendations', async (req, res) => {
             accessories: []
         };
 
-        // For speed and stability, we'll run 2 parallel scrapes at most, or use focused Myntra scraping
-        // To avoid timeout (since Puppeteer is slow), we might want to just scrape 2-3 items per category.
-        // We will do seqential execution to not crash the browser instances.
-
         for (const [category, query] of Object.entries(queries)) {
             console.log(`\n🔍 Searching for ${category}: "${query}"`);
 
             try {
-                // Limit to 4 items per category for the results page
                 const scraped = await scrapeMyntraWithBrowser(query, 4);
 
                 if (scraped && scraped.length > 0) {

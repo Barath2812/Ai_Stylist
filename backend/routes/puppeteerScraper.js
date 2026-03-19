@@ -1,8 +1,12 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
 
-// ============================================
-// MYNTRA SCRAPER WITH PUPPETEER
-// ============================================
+console.log('hi from puppeteerScraper.js');
+
+const searchCache = new Map();
+const CACHE_TTL = 60 * 60 * 1000;
+
 async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
     let browser;
     try {
@@ -21,24 +25,18 @@ async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
         
         const page = await browser.newPage();
         
-        // Set realistic viewport and user agent
         await page.setViewport({ width: 1920, height: 1080 });
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
         
         const url = `https://www.myntra.com/${searchQuery.toLowerCase().replace(/\s+/g, '-')}`;
         
-        // Go to page and wait for content
         await page.goto(url, { 
             waitUntil: 'networkidle2',
             timeout: 30000 
         });
         
-        // Wait for product grid to load
-        await page.waitForSelector('.product-base', { timeout: 10000 }).catch(() => {
-            console.log('Product grid not found, trying alternative selectors...');
-        });
+        await page.waitForSelector('.product-base', { timeout: 10000 }).catch(() => {});
         
-        // Extract product data
         const products = await page.evaluate((limit) => {
             const items = [];
             const productCards = document.querySelectorAll('.product-base');
@@ -85,9 +83,6 @@ async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
     }
 }
 
-// ============================================
-// AJIO SCRAPER WITH PUPPETEER
-// ============================================
 async function scrapeAjioWithBrowser(searchQuery, limit = 10) {
     let browser;
     try {
@@ -109,10 +104,7 @@ async function scrapeAjioWithBrowser(searchQuery, limit = 10) {
             timeout: 30000 
         });
         
-        // Wait for products
-        await page.waitForSelector('.item', { timeout: 10000 }).catch(() => {
-            console.log('Ajio products not found');
-        });
+        await page.waitForSelector('.item', { timeout: 10000 }).catch(() => {});
         
         const products = await page.evaluate((limit) => {
             const items = [];
@@ -156,75 +148,79 @@ async function scrapeAjioWithBrowser(searchQuery, limit = 10) {
     }
 }
 
-// ============================================
-// SEARCH QUERY BUILDER
-// ============================================
-function buildSearchQuery(styleCategory, colors, occasion) {
+function buildSearchQuery(styleCategory, colors, occasion, gender) {
+    const isFemale = gender && gender.toLowerCase() === 'female';
+    const suffix = isFemale ? 'women' : 'men';
+
     const categoryMap = {
-        'Formal Business Attire': 'formal shirt men',
-        'Smart Casual': 'casual shirt men',
-        'Casual Streetwear': 'tshirt men',
-        'Party Evening Wear': 'party shirt men',
-        'Traditional Ethnic': 'kurta men',
-        'Sporty Athletic': 'sports tshirt men'
+        'Formal Business Attire': isFemale ? 'formal shirt women' : 'formal shirt men',
+        'Smart Casual': isFemale ? 'casual top women' : 'casual shirt men',
+        'Casual Streetwear': isFemale ? 'tshirt women' : 'tshirt men',
+        'Party Evening Wear': isFemale ? 'party dress women' : 'party shirt men',
+        'Traditional Ethnic': isFemale ? 'kurti women' : 'kurta men',
+        'Sporty Athletic': isFemale ? 'sports tshirt women' : 'sports tshirt men'
     };
     
-    const baseQuery = categoryMap[styleCategory] || 'shirt men';
-    const color = colors[0]?.toLowerCase() || '';
+    const baseQuery = categoryMap[styleCategory] || `shirt ${suffix}`;
+    const color = colors && colors.length > 0 && colors[0] ? colors[0].toLowerCase() : '';
     
-    return `${color} ${baseQuery}`;
+    return `${color} ${baseQuery}`.trim();
 }
 
-// ============================================
-// MAIN SEARCH FUNCTION
-// ============================================
 async function searchProducts(styleCategory, colors, occasion, options = {}) {
-    const { limit = 12 } = options;
+    const { limit = 12, gender = 'Male' } = options;
     
     console.log(`\n🛍️ Starting product search...`);
-    console.log(`Style: ${styleCategory}, Colors: ${colors.join(', ')}`);
+    console.log(`Style: ${styleCategory}, Colors: ${colors.join(', ')}, Gender: ${gender}`);
     
-    const searchQuery = buildSearchQuery(styleCategory, colors, occasion);
+    const searchQuery = buildSearchQuery(styleCategory, colors, occasion, gender);
     console.log(`📝 Search Query: "${searchQuery}"\n`);
     
+    if (searchCache.has(searchQuery)) {
+        const cachedItem = searchCache.get(searchQuery);
+        if (Date.now() - cachedItem.timestamp < CACHE_TTL) {
+            console.log('⚡ Serving from cache');
+            return cachedItem.data.slice(0, limit);
+        }
+        searchCache.delete(searchQuery);
+    }
+
     let allProducts = [];
     
-    // Try Myntra with Puppeteer
     try {
         const myntraProducts = await scrapeMyntraWithBrowser(searchQuery, Math.ceil(limit / 2));
         allProducts = [...allProducts, ...myntraProducts];
-    } catch (e) {
-        console.log('Myntra failed, continuing...');
-    }
+    } catch (e) {}
     
-    // Try Ajio if not enough products
     if (allProducts.length < limit) {
         try {
             const ajioProducts = await scrapeAjioWithBrowser(searchQuery, limit - allProducts.length);
             allProducts = [...allProducts, ...ajioProducts];
-        } catch (e) {
-            console.log('Ajio failed, continuing...');
-        }
+        } catch (e) {}
     }
     
-    // Fallback to mock data
     if (allProducts.length === 0) {
-        console.log('⚠️ All scraping failed, using mock data');
-        return getMockProducts(styleCategory, colors);
+        return getMockProducts(styleCategory, colors, gender);
     }
     
+    searchCache.set(searchQuery, {
+        data: allProducts,
+        timestamp: Date.now()
+    });
+
     console.log(`\n✅ Total: ${allProducts.length} products found\n`);
     return allProducts.slice(0, limit);
 }
 
-// ============================================
-// MOCK DATA FALLBACK
-// ============================================
-function getMockProducts(styleCategory, colors) {
+function getMockProducts(styleCategory, colors, gender) {
+    const isFemale = gender && gender.toLowerCase() === 'female';
+    const item1 = isFemale ? 'Top' : 'Shirt';
+    const item2 = isFemale ? 'Dress' : 'Premium Blazer';
+
     return [
         {
             id: 'mock-1',
-            name: `${colors[0]} ${styleCategory} Shirt`,
+            name: `${colors[0]} ${styleCategory} ${item1}`,
             brand: 'Generic Brand',
             price: '₹1,299',
             image: 'https://via.placeholder.com/300x400?text=Product+1',
@@ -234,7 +230,7 @@ function getMockProducts(styleCategory, colors) {
         },
         {
             id: 'mock-2',
-            name: `${colors[1]} Premium Blazer`,
+            name: `${colors[1]} ${item2}`,
             brand: 'Generic Brand',
             price: '₹3,499',
             image: 'https://via.placeholder.com/300x400?text=Product+2',

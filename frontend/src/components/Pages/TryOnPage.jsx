@@ -1,26 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import api from '../../api/axios';
 import TryOn from '../TryOn';
 import './TryOnPage.css';
 
 const TryOnPage = () => {
-    // State for initial form
+    const location = useLocation();
+    
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
     const [productUrl, setProductUrl] = useState('');
-    const [urlValid, setUrlValid] = useState(null); // null | true | false
+    const [urlValid, setUrlValid] = useState(null);
 
-    // State for transition to try-on
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
     const [userImagePath, setUserImagePath] = useState('');
     const [showTryOn, setShowTryOn] = useState(false);
 
-    // Dummy product to satisfy TryOn.jsx props
     const [productCache, setProductCache] = useState(null);
 
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_FILE_SIZE = 10 * 1024 * 1024;
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+    useEffect(() => {
+        if (location.state?.prefilledGarmentUrl) {
+            setProductUrl(location.state.prefilledGarmentUrl);
+            setUrlValid(true);
+        }
+    }, [location.state]);
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -28,14 +35,12 @@ const TryOnPage = () => {
 
         if (!selectedFile) return;
 
-        // File type validation
         if (!ALLOWED_TYPES.includes(selectedFile.type)) {
             setError('Please upload a JPEG, PNG, or WebP image.');
             e.target.value = '';
             return;
         }
 
-        // File size validation
         if (selectedFile.size > MAX_FILE_SIZE) {
             const sizeMB = (selectedFile.size / (1024 * 1024)).toFixed(1);
             setError(`Image is too large (${sizeMB}MB). Maximum size is 10MB.`);
@@ -58,7 +63,6 @@ const TryOnPage = () => {
             return;
         }
 
-        // URL validation
         try {
             new URL(productUrl);
         } catch {
@@ -70,7 +74,6 @@ const TryOnPage = () => {
         setUploading(true);
 
         try {
-            // 1. Upload the user image to get a local server path
             const formData = new FormData();
             formData.append('image', file);
 
@@ -81,7 +84,6 @@ const TryOnPage = () => {
             if (uploadRes.data.success) {
                 setUserImagePath(uploadRes.data.imagePath);
 
-                // Construct a product object for TryOn component
                 setProductCache({
                     name: "Custom Garment",
                     price: "Virtual",
@@ -109,7 +111,6 @@ const TryOnPage = () => {
 
     const handleBack = () => {
         setShowTryOn(false);
-        // We keep the uploaded userImagePath and file/preview so user doesn't have to re-upload their photo
     };
 
     if (showTryOn && productCache && userImagePath) {
@@ -135,7 +136,6 @@ const TryOnPage = () => {
                 {error && <div className="tryon-error-msg">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-                    {/* User Photo Upload */}
                     <div className="form-group-tryon">
                         <label>1. Upload Your Photo</label>
                         <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
@@ -156,7 +156,7 @@ const TryOnPage = () => {
                                             setPreview(null);
                                         }}
                                     >
-                                        Ã—
+                                        ×
                                     </button>
                                 </div>
                             ) : (
@@ -168,7 +168,6 @@ const TryOnPage = () => {
                         </label>
                     </div>
 
-                    {/* Garment URL Input */}
                     <div className="form-group-tryon">
                         <label>2. Garment Image URL</label>
                         <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
@@ -218,7 +217,7 @@ const TryOnPage = () => {
                                 <div className="small-spinner"></div>
                                 Preparing Magic...
                             </>
-                        ) : 'Start Virtual Try-On âœ¨'}
+                        ) : 'Start Virtual Try-On ✨'}
                     </button>
                 </form>
             </div>

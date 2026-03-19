@@ -19,6 +19,13 @@ const SearchResults = () => {
     }, [query]);
 
     const searchProducts = async () => {
+        const cachedResults = sessionStorage.getItem(`search_${query}`);
+        if (cachedResults) {
+            setProducts(JSON.parse(cachedResults));
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError('');
@@ -26,8 +33,10 @@ const SearchResults = () => {
             const response = await api.get('/outfits/search', {
                 params: { query, limit: 20 }
             });
+            
             if (response.data.success) {
                 setProducts(response.data.products);
+                sessionStorage.setItem(`search_${query}`, JSON.stringify(response.data.products));
             }
         } catch (err) {
             console.error('Search error:', err);
@@ -38,21 +47,26 @@ const SearchResults = () => {
     };
 
     const tryOutfitMatcher = (product) => {
-        // Navigate to outfit builder with selected product
         navigate('/dashboard/outfits', {
             state: { preSelected: product }
         });
     };
 
+    const handleVirtualTryOn = (product) => {
+        navigate('/dashboard/tryon', {
+            state: { prefilledGarmentUrl: product.image } 
+        });
+    };
+
     return (
-        <div className="search-results-page">
-            <div className="search-header">
+        <div className="search-page">
+            <div className="search-page-header">
                 <h1>Search Results</h1>
-                {query && <p className="search-query">Showing results for: "<span>{query}</span>"</p>}
+                {query && <p className="search-query-display">Showing results for: "<span>{query}</span>"</p>}
             </div>
 
             {loading && (
-                <div className="loading-state">
+                <div className="search-loading">
                     <div className="loader">Searching products...</div>
                 </div>
             )}
@@ -65,29 +79,29 @@ const SearchResults = () => {
             )}
 
             {!loading && !error && products.length === 0 && (
-                <div className="empty-state">
-                    <span className="empty-icon">ðŸ”</span>
+                <div className="search-empty">
+                    <span className="empty-icon">🔍</span>
                     <h3>No products found</h3>
                     <p>Try searching with different keywords</p>
                 </div>
             )}
 
             {!loading && !error && products.length > 0 && (
-                <div className="products-grid">
+                <div className="search-results-grid">
                     {products.map((product) => (
-                        <div key={product.id} className="product-card-result">
+                        <div key={product.id} className="search-product-card">
                             <div className="product-image">
                                 <img src={product.image} alt={product.name} />
                                 <div className="product-source">{product.source}</div>
                             </div>
 
-                            <div className="product-info">
+                            <div className="search-product-details">
                                 {product.brand && (
-                                    <p className="product-brand">{product.brand}</p>
+                                    <p className="brand">{product.brand}</p>
                                 )}
                                 <h3 className="product-name">{product.name}</h3>
                                 <div className="product-pricing">
-                                    <span className="product-price">{product.price}</span>
+                                    <span className="price">{product.price}</span>
                                     {product.originalPrice && (
                                         <span className="product-original-price">{product.originalPrice}</span>
                                     )}
@@ -98,23 +112,35 @@ const SearchResults = () => {
                                 <div className="product-category-badge">{product.category}</div>
                             </div>
 
-                            <div className="product-actions">
+                            <div className="search-product-actions" style={{ flexDirection: 'column', gap: '0.5rem' }}>
                                 <button
-                                    className="btn-outfit-matcher"
-                                    onClick={() => tryOutfitMatcher(product)}
+                                    className="btn-try-on"
+                                    onClick={() => handleVirtualTryOn(product)}
+                                    style={{ background: 'var(--text-primary)', color: 'var(--bg-dark)', padding: '0.65rem', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', border: 'none' }}
                                 >
-                                    ðŸŽ¨ Try Outfit Matcher
+                                    ✨ Try This Now
                                 </button>
-                                {product.buyLink && (
-                                    <a
-                                        href={product.buyLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn-view-product"
+                                
+                                <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
+                                    <button
+                                        className="btn-outfit-matcher"
+                                        onClick={() => tryOutfitMatcher(product)}
+                                        style={{ flex: 1 }}
                                     >
-                                        View Product â†’
-                                    </a>
-                                )}
+                                        🛒 Matcher
+                                    </button>
+                                    {product.buyLink && (
+                                        <a
+                                            href={product.buyLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn-view-product"
+                                            style={{ flex: 1 }}
+                                        >
+                                            Buy →
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

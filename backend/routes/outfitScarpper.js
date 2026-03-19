@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer');
 
+console.log('');
+
 async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
     let browser;
     try {

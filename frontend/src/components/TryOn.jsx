@@ -6,18 +6,16 @@ const TryOn = ({ product, userImagePath, onBack }) => {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
-    const [errorType, setErrorType] = useState(null); // 'network' | 'timeout' | 'rate-limit' | 'server'
+    const [errorType, setErrorType] = useState(null); 
     const [progress, setProgress] = useState(0);
     const [retryCount, setRetryCount] = useState(0);
     const MAX_RETRIES = 3;
-    const TIMEOUT_MS = 120000; // 2 minutes for try-on
+    const TIMEOUT_MS = 120000; 
 
     useEffect(() => {
-        // Auto-start try-on when component loads
         handleTryOn();
     }, []);
 
-    // Simulate progress for better UX
     useEffect(() => {
         if (loading) {
             const interval = setInterval(() => {
@@ -33,7 +31,6 @@ const TryOn = ({ product, userImagePath, onBack }) => {
     const classifyError = (err) => {
         if (!err) return { type: 'server', message: 'An unknown error occurred' };
 
-        // Network errors (no response at all)
         if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
             return {
                 type: 'network',
@@ -42,18 +39,16 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             };
         }
 
-        // Timeout errors
         if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
             return {
                 type: 'timeout',
                 message: 'The try-on process took too long. This can happen when the AI model is warming up.',
-                tips: ['Try again â€” the model may be ready now', 'Use a smaller or clearer image', 'The first attempt often takes longer']
+                tips: ['Try again — the model may be ready now', 'Use a smaller or clearer image', 'The first attempt often takes longer']
             };
         }
 
         const status = err.response?.status;
 
-        // Rate limiting
         if (status === 429) {
             return {
                 type: 'rate-limit',
@@ -62,7 +57,6 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             };
         }
 
-        // Auth errors
         if (status === 401 || status === 403) {
             return {
                 type: 'server',
@@ -71,7 +65,6 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             };
         }
 
-        // Server errors
         if (status >= 500) {
             return {
                 type: 'server',
@@ -80,7 +73,6 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             };
         }
 
-        // Client errors
         if (status >= 400) {
             return {
                 type: 'server',
@@ -107,7 +99,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
         }
 
         try {
-            console.log('ðŸŽ¨ Starting virtual try-on...');
+            console.log('🎨 Starting virtual try-on...');
             console.log('User Image:', userImagePath);
             console.log('Product:', product.name);
 
@@ -119,7 +111,7 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             });
 
             if (response.data.success) {
-                console.log('âœ… Virtual try-on successful!');
+                console.log('✅ Virtual try-on successful!');
                 setProgress(100);
                 setRetryCount(0);
                 setTimeout(() => {
@@ -131,14 +123,13 @@ const TryOn = ({ product, userImagePath, onBack }) => {
             }
 
         } catch (err) {
-            console.error('âŒ Try-on error:', err);
+            console.error('❌ Try-on error:', err);
             const classified = classifyError(err);
 
-            // Auto-retry for server errors and rate limits
             const currentRetry = isRetry ? retryCount : 0;
             if ((classified.type === 'server' || classified.type === 'rate-limit') && currentRetry < MAX_RETRIES) {
-                const delay = Math.pow(2, currentRetry) * 1000; // 1s, 2s, 4s
-                console.log(`ðŸ”„ Retrying in ${delay / 1000}s (attempt ${currentRetry + 1}/${MAX_RETRIES})...`);
+                const delay = Math.pow(2, currentRetry) * 1000; 
+                console.log(`🔄 Retrying in ${delay / 1000}s (attempt ${currentRetry + 1}/${MAX_RETRIES})...`);
                 setRetryCount(prev => prev + 1);
                 setProgress(5);
                 setTimeout(() => handleTryOn(true), delay);
@@ -156,13 +147,12 @@ const TryOn = ({ product, userImagePath, onBack }) => {
         <div className="tryon-container">
             <div className="tryon-header">
                 <button onClick={onBack} className="back-button">
-                    â† Back to Products
+                    ← Back to Products
                 </button>
                 <h2>Virtual Try-On</h2>
                 <p className="product-name">{product.name} - {product.price}</p>
             </div>
 
-            {/* Loading State */}
             {loading && (
                 <div className="tryon-loading">
                     <div className="loading-animation">
@@ -180,38 +170,27 @@ const TryOn = ({ product, userImagePath, onBack }) => {
                 </div>
             )}
 
-            {/* Error State */}
             {error && !loading && (
                 <div className="tryon-error">
                     <div className="error-card">
-                        <span className="error-icon">âš ï¸</span>
+                        <span className="error-icon">⚠️</span>
                         <h3>Oops! Something went wrong</h3>
                         <p>{error}</p>
                         <div className="error-actions">
                             <button onClick={handleTryOn} className="retry-button">
-                                ðŸ”„ Try Again
+                                🔄 Try Again
                             </button>
                             <button onClick={onBack} className="back-button-alt">
-                                â† Back to Products
+                                ← Back to Products
                             </button>
-                        </div>
-                        <div className="error-help">
-                            <p><strong>Troubleshooting:</strong></p>
-                            <ul>
-                                <li>Make sure your Google Colab notebook is running</li>
-                                <li>Check if the Colab URL is correct in .env file</li>
-                                <li>The first try-on might take longer (model warming up)</li>
-                            </ul>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Result State */}
             {result && !loading && (
                 <div className="tryon-result">
                     <div className="result-grid">
-                        {/* Product Image */}
                         <div className="comparison-item">
                             <h3>Selected Product</h3>
                             <div className="image-card">
@@ -220,14 +199,12 @@ const TryOn = ({ product, userImagePath, onBack }) => {
                             <p className="image-label">Original Product</p>
                         </div>
 
-                        {/* Arrow */}
                         <div className="comparison-arrow">
-                            <span>â†’</span>
+                            <span>→</span>
                         </div>
 
-                        {/* Result Image */}
                         <div className="comparison-item">
-                            <h3>You Wearing It! ðŸŽ‰</h3>
+                            <h3>You Wearing It! 🎉</h3>
                             <div className="image-card result-card">
                                 <img 
                                     src={`data:image/jpeg;base64,${result}`} 
@@ -238,10 +215,9 @@ const TryOn = ({ product, userImagePath, onBack }) => {
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="result-actions">
                         <button onClick={handleTryOn} className="try-again-button">
-                            ðŸ”„ Try Again
+                            🔄 Try Again
                         </button>
                         <a 
                             href={product.buyLink} 
@@ -249,21 +225,20 @@ const TryOn = ({ product, userImagePath, onBack }) => {
                             rel="noopener noreferrer"
                             className="buy-button"
                         >
-                            ðŸ›’ Buy This Product
+                            🛒 Buy This Product
                         </a>
                         <button onClick={onBack} className="back-button-primary">
-                            â† Try Other Products
+                            ← Try Other Products
                         </button>
                     </div>
 
-                    {/* Download Option */}
                     <div className="download-section">
                         <a 
                             href={`data:image/jpeg;base64,${result}`} 
                             download={`tryon-${product.name}.jpg`}
                             className="download-button"
                         >
-                            ðŸ’¾ Download Image
+                            💾 Download Image
                         </a>
                     </div>
                 </div>
