@@ -13,8 +13,7 @@ async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
         console.log(`🔍 Scraping Myntra with browser: ${searchQuery}`);
         
         browser = await puppeteer.launch({
-            headless: true,
-            executablePath: '/usr/bin/chromium',  
+            headless: true,  
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
