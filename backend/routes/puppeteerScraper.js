@@ -8,7 +8,9 @@ const CACHE = new Map();
 async function launchBrowser() {
     return await chromium.launch({
         headless: true,
-        args: ['--no-sandbox']
+        args: ['--no-sandbox',
+              '--disable-setuid-sandbox',
+            '--disable-blink-features=AutomationControlled']
     });
 }
 
@@ -20,41 +22,37 @@ async function scrapeMyntra(query, limit = 6) {
 
     try {
         browser = await launchBrowser();
-        const page = await browser.newPage();
 
-        // ✅ REAL USER HEADERS
+        const context = await browser.newContext({
+            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+            viewport: { width: 1366, height: 768 },
+            locale: 'en-US'
+        });
+
+        const page = await context.newPage();
+
         await page.setExtraHTTPHeaders({
             'accept-language': 'en-US,en;q=0.9'
         });
-
-        await page.setViewportSize({ width: 1366, height: 768 });
-
-        // ✅ USER AGENT
-        await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
-        );
 
         const url = `https://www.myntra.com/${query.replace(/\s+/g, '-')}`;
 
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-        // ✅ WAIT LIKE HUMAN
         await page.waitForTimeout(5000);
 
-        // ✅ SCROLL (VERY IMPORTANT)
         await page.mouse.wheel(0, 2000);
 
         await page.waitForTimeout(2000);
 
-        // ✅ DEBUG (optional)
         const html = await page.content();
+
         if (!html.includes('product-base')) {
-            console.log("⚠️ Myntra blocked or page empty");
+            console.log("⚠️ Myntra blocked");
             await browser.close();
             return [];
         }
 
-        // ✅ EXTRACT DATA
         const products = await page.$$eval('.product-base', (cards, limit) => {
             return cards.slice(0, limit).map((card, i) => ({
                 id: `myntra-${i}`,
@@ -78,7 +76,6 @@ async function scrapeMyntra(query, limit = 6) {
         return [];
     }
 }
-
 // =========================
 // 🔍 Ajio Scraper
 // =========================
