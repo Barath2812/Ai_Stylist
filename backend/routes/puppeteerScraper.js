@@ -1,22 +1,14 @@
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-
-puppeteer.use(StealthPlugin());
+const { chromium } = require('playwright');
 
 const CACHE = new Map();
 
+// =========================
+// 🚀 Launch Browser
+// =========================
 async function launchBrowser() {
-    return await puppeteer.launch({
+    return await chromium.launch({
         headless: true,
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--single-process',
-            '--no-zygote'
-        ]
+        args: ['--no-sandbox']
     });
 }
 
@@ -32,48 +24,26 @@ async function scrapeMyntra(query, limit = 6) {
         browser = await launchBrowser();
         const page = await browser.newPage();
 
-        await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
-        );
-
-        await page.setViewport({ width: 1366, height: 768 });
-
-        const url = `https://www.myntra.com/${query.replace(/\s+/g, '-')}`;
-
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+        await page.goto(`https://www.myntra.com/${query.replace(/\s+/g, '-')}`, {
+            waitUntil: 'domcontentloaded'
+        });
 
         await page.waitForTimeout(4000);
 
-        await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+        await page.mouse.wheel(0, 1000);
 
         await page.waitForSelector('.product-base', { timeout: 15000 });
 
-        const products = await page.evaluate((limit) => {
-            const data = [];
-            const cards = document.querySelectorAll('.product-base');
-
-            cards.forEach((card, i) => {
-                if (i >= limit) return;
-
-                const name = card.querySelector('.product-product')?.innerText;
-                const brand = card.querySelector('.product-brand')?.innerText;
-                const price = card.querySelector('.product-discountedPrice')?.innerText;
-                const image = card.querySelector('img')?.src;
-                const link = card.querySelector('a')?.href;
-
-                if (name && price) {
-                    data.push({
-                        id: `myntra-${i}`,
-                        name: `${brand || ''} ${name}`,
-                        price,
-                        image,
-                        buyLink: link,
-                        source: "Myntra"
-                    });
-                }
-            });
-
-            return data;
+        const products = await page.$$eval('.product-base', (cards, limit) => {
+            return cards.slice(0, limit).map((card, i) => ({
+                id: `myntra-${i}`,
+                name: (card.querySelector('.product-brand')?.innerText || '') + ' ' +
+                      (card.querySelector('.product-product')?.innerText || ''),
+                price: card.querySelector('.product-discountedPrice')?.innerText,
+                image: card.querySelector('img')?.src,
+                buyLink: card.querySelector('a')?.href,
+                source: 'Myntra'
+            }));
         }, limit);
 
         await browser.close();
@@ -98,42 +68,22 @@ async function scrapeAjio(query, limit = 6) {
         browser = await launchBrowser();
         const page = await browser.newPage();
 
-        await page.setUserAgent('Mozilla/5.0');
-
-        const url = `https://www.ajio.com/search/?text=${encodeURIComponent(query)}`;
-
-        await page.goto(url, { waitUntil: 'domcontentloaded' });
+        await page.goto(`https://www.ajio.com/search/?text=${encodeURIComponent(query)}`);
 
         await page.waitForTimeout(4000);
 
         await page.waitForSelector('.item', { timeout: 15000 });
 
-        const products = await page.evaluate((limit) => {
-            const data = [];
-            const cards = document.querySelectorAll('.item');
-
-            cards.forEach((card, i) => {
-                if (i >= limit) return;
-
-                const name = card.querySelector('.nameCls')?.innerText;
-                const brand = card.querySelector('.brand')?.innerText;
-                const price = card.querySelector('.price')?.innerText;
-                const image = card.querySelector('img')?.src;
-                const link = card.querySelector('a')?.href;
-
-                if (name && price) {
-                    data.push({
-                        id: `ajio-${i}`,
-                        name: `${brand || ''} ${name}`,
-                        price,
-                        image,
-                        buyLink: link,
-                        source: "Ajio"
-                    });
-                }
-            });
-
-            return data;
+        const products = await page.$$eval('.item', (cards, limit) => {
+            return cards.slice(0, limit).map((card, i) => ({
+                id: `ajio-${i}`,
+                name: (card.querySelector('.brand')?.innerText || '') + ' ' +
+                      (card.querySelector('.nameCls')?.innerText || ''),
+                price: card.querySelector('.price')?.innerText,
+                image: card.querySelector('img')?.src,
+                buyLink: card.querySelector('a')?.href,
+                source: 'Ajio'
+            }));
         }, limit);
 
         await browser.close();
@@ -163,7 +113,7 @@ async function searchProducts(query) {
 
     if (results.length === 0) {
         results = [{
-            name: "Sample Shirt",
+            name: "Sample Product",
             price: "₹999",
             image: "https://via.placeholder.com/300",
             source: "Mock"
@@ -175,4 +125,9 @@ async function searchProducts(query) {
     return results;
 }
 
-module.exports = { searchProducts };
+// ✅ Export (important)
+module.exports = {
+    searchProducts,
+    scrapeMyntraWithBrowser: scrapeMyntra,
+    scrapeAjioWithBrowser: scrapeAjio
+};
