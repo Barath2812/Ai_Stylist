@@ -1,91 +1,86 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const fs = require('fs');
 
 puppeteer.use(StealthPlugin());
 
-console.log('hi from puppeteerScraper.js');
+const CACHE = new Map();
 
-// ✅ Ensure cache directory exists
-const CACHE_PATH = '/opt/render/.cache/puppeteer';
-if (!fs.existsSync(CACHE_PATH)) {
-    fs.mkdirSync(CACHE_PATH, { recursive: true });
+async function launchBrowser() {
+    return await puppeteer.launch({
+        headless: true,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--single-process',
+            '--no-zygote'
+        ]
+    });
 }
-
-const searchCache = new Map();
-const CACHE_TTL = 60 * 60 * 1000;
 
 // =========================
 // 🔍 Myntra Scraper
 // =========================
-async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
+async function scrapeMyntra(query, limit = 6) {
     let browser;
 
     try {
-        console.log(`🔍 Scraping Myntra with browser: ${searchQuery}`);
+        console.log("🔍 Myntra:", query);
 
-        browser = await puppeteer.launch({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ]
-        });
-
+        browser = await launchBrowser();
         const page = await browser.newPage();
 
-        await page.setViewport({ width: 1920, height: 1080 });
         await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36'
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
         );
 
-        const url = `https://www.myntra.com/${searchQuery.toLowerCase().replace(/\s+/g, '-')}`;
+        await page.setViewport({ width: 1366, height: 768 });
 
-        await page.goto(url, {
-            waitUntil: 'networkidle2',
-            timeout: 30000
-        });
+        const url = `https://www.myntra.com/${query.replace(/\s+/g, '-')}`;
 
-        await page.waitForSelector('.product-base', { timeout: 10000 }).catch(() => {});
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+        await page.waitForTimeout(4000);
+
+        await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+
+        await page.waitForSelector('.product-base', { timeout: 15000 });
 
         const products = await page.evaluate((limit) => {
-            const items = [];
+            const data = [];
             const cards = document.querySelectorAll('.product-base');
 
-            for (let i = 0; i < Math.min(cards.length, limit); i++) {
-                const card = cards[i];
+            cards.forEach((card, i) => {
+                if (i >= limit) return;
 
-                const name = card.querySelector('.product-product')?.textContent?.trim();
-                const brand = card.querySelector('.product-brand')?.textContent?.trim();
-                const price = card.querySelector('.product-discountedPrice')?.textContent?.trim();
+                const name = card.querySelector('.product-product')?.innerText;
+                const brand = card.querySelector('.product-brand')?.innerText;
+                const price = card.querySelector('.product-discountedPrice')?.innerText;
                 const image = card.querySelector('img')?.src;
                 const link = card.querySelector('a')?.href;
 
-                if (name && price && image) {
-                    items.push({
-                        id: `myntra-${Date.now()}-${i}`,
+                if (name && price) {
+                    data.push({
+                        id: `myntra-${i}`,
                         name: `${brand || ''} ${name}`,
-                        brand,
                         price,
                         image,
                         buyLink: link,
-                        category: 'upper_body',
-                        source: 'Myntra'
+                        source: "Myntra"
                     });
                 }
-            }
+            });
 
-            return items;
+            return data;
         }, limit);
 
         await browser.close();
-        console.log(`✅ Myntra: Found ${products.length} products`);
         return products;
 
-    } catch (error) {
-        console.error('❌ Myntra browser scraping failed:', error.message);
+    } catch (err) {
+        console.log("❌ Myntra failed:", err.message);
         if (browser) await browser.close();
         return [];
     }
@@ -94,132 +89,90 @@ async function scrapeMyntraWithBrowser(searchQuery, limit = 10) {
 // =========================
 // 🔍 Ajio Scraper
 // =========================
-async function scrapeAjioWithBrowser(searchQuery, limit = 10) {
+async function scrapeAjio(query, limit = 6) {
     let browser;
 
     try {
-        console.log(`🔍 Scraping Ajio with browser: ${searchQuery}`);
+        console.log("🔍 Ajio:", query);
 
-        browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-
+        browser = await launchBrowser();
         const page = await browser.newPage();
 
-        await page.setViewport({ width: 1920, height: 1080 });
         await page.setUserAgent('Mozilla/5.0');
 
-        const url = `https://www.ajio.com/search/?text=${encodeURIComponent(searchQuery)}`;
+        const url = `https://www.ajio.com/search/?text=${encodeURIComponent(query)}`;
 
-        await page.goto(url, {
-            waitUntil: 'networkidle2',
-            timeout: 30000
-        });
+        await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-        await page.waitForSelector('.item', { timeout: 10000 }).catch(() => {});
+        await page.waitForTimeout(4000);
+
+        await page.waitForSelector('.item', { timeout: 15000 });
 
         const products = await page.evaluate((limit) => {
-            const items = [];
+            const data = [];
             const cards = document.querySelectorAll('.item');
 
-            for (let i = 0; i < Math.min(cards.length, limit); i++) {
-                const card = cards[i];
+            cards.forEach((card, i) => {
+                if (i >= limit) return;
 
-                const name = card.querySelector('.nameCls')?.textContent?.trim();
-                const brand = card.querySelector('.brand')?.textContent?.trim();
-                const price = card.querySelector('.price')?.textContent?.trim();
+                const name = card.querySelector('.nameCls')?.innerText;
+                const brand = card.querySelector('.brand')?.innerText;
+                const price = card.querySelector('.price')?.innerText;
                 const image = card.querySelector('img')?.src;
                 const link = card.querySelector('a')?.href;
 
                 if (name && price) {
-                    items.push({
-                        id: `ajio-${Date.now()}-${i}`,
+                    data.push({
+                        id: `ajio-${i}`,
                         name: `${brand || ''} ${name}`,
-                        brand,
                         price,
-                        image: image?.startsWith('http') ? image : `https:${image}`,
+                        image,
                         buyLink: link,
-                        category: 'upper_body',
-                        source: 'Ajio'
+                        source: "Ajio"
                     });
                 }
-            }
+            });
 
-            return items;
+            return data;
         }, limit);
 
         await browser.close();
-        console.log(`✅ Ajio: Found ${products.length} products`);
         return products;
 
-    } catch (error) {
-        console.error('❌ Ajio browser scraping failed:', error.message);
+    } catch (err) {
+        console.log("❌ Ajio failed:", err.message);
         if (browser) await browser.close();
         return [];
     }
 }
 
 // =========================
-// 🔎 Search Logic
+// 🔎 Main Search
 // =========================
-function buildSearchQuery(styleCategory, colors, occasion, gender) {
-    const suffix = gender?.toLowerCase() === 'female' ? 'women' : 'men';
-    const base = `shirt ${suffix}`;
-    const color = colors?.[0] || '';
-    return `${color} ${base}`.trim();
-}
+async function searchProducts(query) {
 
-async function searchProducts(styleCategory, colors, occasion, options = {}) {
-    const { limit = 12, gender = 'Male' } = options;
+    if (CACHE.has(query)) return CACHE.get(query);
 
-    const query = buildSearchQuery(styleCategory, colors, occasion, gender);
+    let results = [];
 
-    if (searchCache.has(query)) {
-        const cached = searchCache.get(query);
-        if (Date.now() - cached.timestamp < CACHE_TTL) {
-            return cached.data.slice(0, limit);
-        }
+    results.push(...await scrapeMyntra(query));
+
+    if (results.length < 10) {
+        results.push(...await scrapeAjio(query));
     }
 
-    let products = [];
-
-    try {
-        products.push(...await scrapeMyntraWithBrowser(query, 6));
-    } catch {}
-
-    if (products.length < limit) {
-        try {
-            products.push(...await scrapeAjioWithBrowser(query, limit - products.length));
-        } catch {}
+    if (results.length === 0) {
+        results = [{
+            name: "Sample Shirt",
+            price: "₹999",
+            image: "https://via.placeholder.com/300",
+            source: "Mock"
+        }];
     }
 
-    if (products.length === 0) {
-        return getMockProducts(colors);
-    }
+    CACHE.set(query, results);
 
-    searchCache.set(query, { data: products, timestamp: Date.now() });
-
-    return products.slice(0, limit);
+    return results;
 }
 
-// =========================
-// 🎭 Mock fallback
-// =========================
-function getMockProducts(colors) {
-    return [
-        {
-            id: 'mock-1',
-            name: `${colors[0] || ''} Shirt`,
-            price: '₹999',
-            image: 'https://via.placeholder.com/300x400',
-            source: 'Mock'
-        }
-    ];
-}
-
-module.exports = {
-    searchProducts,
-    scrapeMyntraWithBrowser,
-    scrapeAjioWithBrowser
-};
+module.exports = { searchProducts };
