@@ -19,26 +19,49 @@ async function scrapeMyntra(query, limit = 6) {
     let browser;
 
     try {
-        console.log("🔍 Myntra:", query);
-
         browser = await launchBrowser();
         const page = await browser.newPage();
 
-        await page.goto(`https://www.myntra.com/${query.replace(/\s+/g, '-')}`, {
-            waitUntil: 'domcontentloaded'
+        // ✅ REAL USER HEADERS
+        await page.setExtraHTTPHeaders({
+            'accept-language': 'en-US,en;q=0.9'
         });
 
-        await page.waitForTimeout(4000);
+        await page.setViewportSize({ width: 1366, height: 768 });
 
-        await page.mouse.wheel(0, 1000);
+        // ✅ USER AGENT
+        await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
+        );
 
-        await page.waitForSelector('.product-base', { timeout: 15000 });
+        const url = `https://www.myntra.com/${query.replace(/\s+/g, '-')}`;
 
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
+
+        // ✅ WAIT LIKE HUMAN
+        await page.waitForTimeout(5000);
+
+        // ✅ SCROLL (VERY IMPORTANT)
+        await page.mouse.wheel(0, 2000);
+
+        await page.waitForTimeout(2000);
+
+        // ✅ DEBUG (optional)
+        const html = await page.content();
+        if (!html.includes('product-base')) {
+            console.log("⚠️ Myntra blocked or page empty");
+            await browser.close();
+            return [];
+        }
+
+        // ✅ EXTRACT DATA
         const products = await page.$$eval('.product-base', (cards, limit) => {
             return cards.slice(0, limit).map((card, i) => ({
                 id: `myntra-${i}`,
-                name: (card.querySelector('.product-brand')?.innerText || '') + ' ' +
-                      (card.querySelector('.product-product')?.innerText || ''),
+                name:
+                    (card.querySelector('.product-brand')?.innerText || '') +
+                    ' ' +
+                    (card.querySelector('.product-product')?.innerText || ''),
                 price: card.querySelector('.product-discountedPrice')?.innerText,
                 image: card.querySelector('img')?.src,
                 buyLink: card.querySelector('a')?.href,
