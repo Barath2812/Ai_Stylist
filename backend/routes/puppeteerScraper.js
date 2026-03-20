@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const axios = require('axios');
 
 const CACHE = new Map();
 
@@ -8,42 +9,66 @@ const CACHE = new Map();
 async function launchBrowser() {
     return await chromium.launch({
         headless: true,
-        args: ['--no-sandbox',
-              '--disable-setuid-sandbox',
-            '--disable-blink-features=AutomationControlled']
+        args: ['--no-sandbox']
     });
 }
 
 // =========================
-// 🔍 Myntra Scraper
+// 🔍 AJIO (PRIMARY)
+// =========================
+async function scrapeAjio(query, limit = 6) {
+    let browser;
+
+    try {
+        browser = await launchBrowser();
+        const context = await browser.newContext();
+        const page = await context.newPage();
+
+        await page.goto(`https://www.ajio.com/search/?text=${encodeURIComponent(query)}`);
+
+        await page.waitForTimeout(4000);
+
+        const products = await page.$$eval('.item', (cards, limit) => {
+            return cards.slice(0, limit).map((card, i) => ({
+                id: `ajio-${i}`,
+                name: (card.querySelector('.brand')?.innerText || '') + ' ' +
+                      (card.querySelector('.nameCls')?.innerText || ''),
+                price: card.querySelector('.price')?.innerText,
+                image: card.querySelector('img')?.src,
+                buyLink: card.querySelector('a')?.href,
+                source: 'Ajio'
+            }));
+        }, limit);
+
+        await browser.close();
+        return products;
+
+    } catch (err) {
+        console.log("❌ Ajio failed:", err.message);
+        if (browser) await browser.close();
+        return [];
+    }
+}
+
+// =========================
+// 🔍 MYNTRA (SECONDARY)
 // =========================
 async function scrapeMyntra(query, limit = 6) {
     let browser;
 
     try {
         browser = await launchBrowser();
-
         const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
-            viewport: { width: 1366, height: 768 },
-            locale: 'en-US'
+            userAgent: 'Mozilla/5.0',
+            viewport: { width: 1366, height: 768 }
         });
 
         const page = await context.newPage();
 
-        await page.setExtraHTTPHeaders({
-            'accept-language': 'en-US,en;q=0.9'
-        });
+        const url = `https://www.myntra.com/search?q=${encodeURIComponent(query)}`;
 
-        const url = `https://www.myntra.com/${query.replace(/\s+/g, '-')}`;
-
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-
+        await page.goto(url);
         await page.waitForTimeout(5000);
-
-        await page.mouse.wheel(0, 2000);
-
-        await page.waitForTimeout(2000);
 
         const html = await page.content();
 
@@ -76,48 +101,50 @@ async function scrapeMyntra(query, limit = 6) {
         return [];
     }
 }
-// =========================
-// 🔍 Ajio Scraper
-// =========================
-async function scrapeAjio(query, limit = 6) {
-    let browser;
 
+// =========================
+// 🌐 FREE API (PLATZI)
+// =========================
+async function fetchPlatziAPI(query, limit = 6) {
     try {
-        console.log("🔍 Ajio:", query);
+        console.log("🌐 Fetching from Platzi API...");
 
-        browser = await launchBrowser();
-        const page = await browser.newPage();
+        const res = await axios.get('https://api.escuelajs.co/api/v1/products');
 
-        await page.goto(`https://www.ajio.com/search/?text=${encodeURIComponent(query)}`);
-
-        await page.waitForTimeout(4000);
-
-        await page.waitForSelector('.item', { timeout: 15000 });
-
-        const products = await page.$$eval('.item', (cards, limit) => {
-            return cards.slice(0, limit).map((card, i) => ({
-                id: `ajio-${i}`,
-                name: (card.querySelector('.brand')?.innerText || '') + ' ' +
-                      (card.querySelector('.nameCls')?.innerText || ''),
-                price: card.querySelector('.price')?.innerText,
-                image: card.querySelector('img')?.src,
-                buyLink: card.querySelector('a')?.href,
-                source: 'Ajio'
+        const filtered = res.data
+            .filter(p => p.title.toLowerCase().includes(query.split(' ')[0]))
+            .slice(0, limit)
+            .map((p, i) => ({
+                id: `api-${i}`,
+                name: p.title,
+                price: `₹${Math.floor(p.price * 80)}`, // convert USD → INR approx
+                image: p.images?.[0],
+                buyLink: '#',
+                source: 'API'
             }));
-        }, limit);
 
-        await browser.close();
-        return products;
+        return filtered;
 
     } catch (err) {
-        console.log("❌ Ajio failed:", err.message);
-        if (browser) await browser.close();
+        console.log("❌ API failed:", err.message);
         return [];
     }
 }
 
 // =========================
-// 🔎 Main Search
+// 🎭 MOCK FALLBACK
+// =========================
+function getMockProducts(query) {
+    return [{
+        name: query,
+        price: "₹999",
+        image: "https://via.placeholder.com/300",
+        source: "Mock"
+    }];
+}
+
+// =========================
+// 🔎 MAIN SEARCH LOGIC
 // =========================
 async function searchProducts(query) {
 
@@ -125,19 +152,22 @@ async function searchProducts(query) {
 
     let results = [];
 
-    results.push(...await scrapeMyntra(query));
+    // 1️⃣ Ajio
+    results = await scrapeAjio(query);
 
-    if (results.length < 10) {
-        results.push(...await scrapeAjio(query));
+    // 2️⃣ Myntra
+    if (!results.length) {
+        results = await scrapeMyntra(query);
     }
 
-    if (results.length === 0) {
-        results = [{
-            name: "Sample Product",
-            price: "₹999",
-            image: "https://via.placeholder.com/300",
-            source: "Mock"
-        }];
+    // 3️⃣ API fallback
+    if (!results.length) {
+        results = await fetchPlatziAPI(query);
+    }
+
+    // 4️⃣ Mock fallback
+    if (!results.length) {
+        results = getMockProducts(query);
     }
 
     CACHE.set(query, results);
@@ -145,7 +175,9 @@ async function searchProducts(query) {
     return results;
 }
 
-// ✅ Export (important)
+// =========================
+// EXPORT
+// =========================
 module.exports = {
     searchProducts,
     scrapeMyntraWithBrowser: scrapeMyntra,
